@@ -1,0 +1,40 @@
+---
+title: Sylo docs
+description: Documentation for Sylo, the all-in-one Discord bot, and Sylo-Fluxer, its port to Fluxer.
+template: splash
+hero:
+  tagline: Documentation for Sylo (Discord) and Sylo-Fluxer — the same 34 modules, self-hosting guides, and everything else.
+  image:
+    file: ../../assets/sylo-icon.webp
+  actions:
+    - text: Self-host on Discord
+      link: /self-hosting/discord/
+      icon: right-arrow
+    - text: Self-host on Fluxer
+      link: /self-hosting/fluxer/
+      icon: right-arrow
+      variant: minimal
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+## Start here
+
+<CardGrid stagger>
+	<Card title="Modules" icon="puzzle">
+		What each of Sylo's 34 modules does, the permissions it needs, its settings and commands.
+		[Browse modules](/modules/moderation/)
+	</Card>
+	<Card title="Self-host on Discord" icon="rocket">
+		Run your own copy of Sylo with Docker — environment variables, reverse proxy, backups, upgrades.
+		[Read the guide](/self-hosting/discord/)
+	</Card>
+	<Card title="Self-host on Fluxer" icon="rocket">
+		Sylo-Fluxer is a beta port of Sylo to [Fluxer](https://fluxer.app), self-host only for now.
+		[Read the guide](/self-hosting/fluxer/)
+	</Card>
+	<Card title="sylobot.com" icon="external">
+		The marketing site — features, the free hosted Discord bot, and how Sylo compares.
+		[Visit sylobot.com](https://sylobot.com)
+	</Card>
+</CardGrid>
