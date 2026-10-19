@@ -1,7 +1,9 @@
 ---
 title: Starboard
+description: Re-post well-reacted messages into a highlights channel.
 ---
 
+<!-- Generated from Sylo's docs/modules/starboard.md by scripts/ — edit it there and re-run `npm run import`. -->
 
 Re-posts messages that get enough of a chosen reaction into a highlights channel.
 Supports multiple independent boards.

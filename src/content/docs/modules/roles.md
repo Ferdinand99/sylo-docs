@@ -1,7 +1,9 @@
 ---
 title: Reaction roles & autoroles
+description: Self-assign roles from a message; roles automatically on join.
 ---
 
+<!-- Generated from Sylo's docs/modules/roles.md by scripts/ — edit it there and re-run `npm run import`. -->
 
 Two features in one module:
 

@@ -1,7 +1,9 @@
 ---
 title: Counting
+description: Members count upward one number at a time.
 ---
 
+<!-- Generated from Sylo's docs/modules/counting.md by scripts/ — edit it there and re-run `npm run import`. -->
 
 A channel where members count upward one number at a time. Sylo tracks the
 current number and the record.

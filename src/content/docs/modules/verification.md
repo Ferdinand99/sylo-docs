@@ -1,7 +1,9 @@
 ---
 title: Verification
+description: Gate new members behind a button or captcha.
 ---
 
+<!-- Generated from Sylo's docs/modules/verification.md by scripts/ — edit it there and re-run `npm run import`. -->
 
 Gate new members behind a **Verify** button (or a Cloudflare Turnstile captcha)
 before they get a role.

@@ -1,7 +1,9 @@
 ---
 title: Game stats
+description: Battlefield-series player lookups via /stats.
 ---
 
+<!-- Generated from Sylo's docs/modules/game-stats.md by scripts/ — edit it there and re-run `npm run import`. -->
 
 Player stat lookups via `/stats`. Pick a game from the `game` dropdown:
 
@@ -33,5 +35,5 @@ Player stat lookups via `/stats`. Pick a game from the `game` dropdown:
 - RuneScape combat level is computed from the combat skills — the Hiscores feed
   doesn't include it.
 - This is the feature Sylo was originally built around; see
-  [Adding another game](../../README.md#adding-another-game) to extend it — a new
+  [Adding another game](https://github.com/Ferdinand99/Sylo/blob/main/README.md#adding-another-game) to extend it — a new
   adapter file plus one `game` choice in `src/bot/commands/stats.js`.

@@ -1,7 +1,9 @@
 ---
 title: Giveaways
+description: Prize giveaways with an Enter button; auto-drawn winners.
 ---
 
+<!-- Generated from Sylo's docs/modules/giveaways.md by scripts/ — edit it there and re-run `npm run import`. -->
 
 Run prize giveaways with an **Enter** button. Winners are drawn automatically at
 the end time.

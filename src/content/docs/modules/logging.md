@@ -1,7 +1,9 @@
 ---
 title: Server logging
+description: Send member/message/role/channel events to log channels.
 ---
 
+<!-- Generated from Sylo's docs/modules/logging.md by scripts/ — edit it there and re-run `npm run import`. -->
 
 Sends server events to a log channel as embeds. Each event type is toggled
 individually.

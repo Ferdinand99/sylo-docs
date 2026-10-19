@@ -2,11 +2,11 @@
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 
-// Module id -> docs/modules/<id>.md display name, and the Core / Moderation &
-// filtering / Engagement / Utilities / Social alerts grouping — both taken
-// from the dashboard's own module taxonomy (src/web/lib/overviewSummary.js's
-// LAYOUT, and web-v2's docs.js MODULES_DOCS list) so this sidebar doesn't
-// drift from how the dashboard itself organises modules.
+// Module id -> display name (Sylo's src/modules/registry.js), grouped and
+// ordered like the dashboard's Overview page (src/web/lib/overviewSummary.js
+// LAYOUT) so this sidebar doesn't drift from how the dashboard organises
+// modules. All 35 registry modules except honeypot (see below). A third entry
+// marks a module the registry flags `beta: true`.
 const moduleGroups = [
   {
     label: 'Core',
@@ -16,9 +16,9 @@ const moduleGroups = [
     label: 'Moderation & filtering',
     modules: [
       ['automod', 'Auto-moderation'],
-      // 'honeypot' is missing here: docs/modules/honeypot.md doesn't exist in
-      // the Sylo repo yet (site/docs.js references it too, so the live
-      // docs.html page has had a silently-broken fetch for it already).
+      // 'honeypot' (beta) is missing here: docs/modules/honeypot.md doesn't
+      // exist in the Sylo repo yet, so there's nothing to import. Add it once
+      // the doc exists (scripts/import-modules.mjs picks it up by itself).
       ['verification', 'Verification'],
       ['appeals', 'Ban appeals'],
       ['logging', 'Server logging'],
@@ -65,14 +65,26 @@ const moduleGroups = [
       ['kick-alerts', 'Kick alerts'],
       ['rss', 'RSS alerts'],
       ['github', 'GitHub alerts'],
+      // Owner-only: only the instance owner (OWNER_IDS / FLUXER_OWNER_IDS) can
+      // see or enable it in the dashboard.
+      ['apple-connect', 'App Store Connect (owner)', { beta: true }],
     ],
   },
 ];
 
-const modulesSidebar = moduleGroups.map((g) => ({
-  label: g.label,
-  items: g.modules.map(([id, label]) => ({ label, slug: `modules/${id}` })),
-}));
+const beta = { text: 'Beta', variant: 'caution' };
+
+const modulesSidebar = [
+  { label: 'Overview', slug: 'modules' },
+  ...moduleGroups.map((g) => ({
+    label: g.label,
+    items: g.modules.map(([id, label, opts]) => ({
+      label,
+      slug: `modules/${id}`,
+      ...(opts?.beta ? { badge: beta } : {}),
+    })),
+  })),
+];
 
 // https://astro.build/config
 export default defineConfig({
@@ -89,6 +101,10 @@ export default defineConfig({
       // Colours are literal per theme (not CSS vars) so Expressive Code can
       // still derive contrast-safe colours from them.
       expressiveCode: {
+        // Fence languages the imported Sylo docs use that Shiki doesn't know:
+        // there's no Caddyfile grammar, so ```caddy / ```caddyfile render as
+        // plain text, and ```env is Shiki's "dotenv" — no warning per build.
+        shiki: { langAlias: { caddy: 'txt', caddyfile: 'txt', env: 'dotenv' } },
         themes: ['github-dark-default', 'github-light-default'],
         styleOverrides: {
           borderRadius: '14px',
@@ -135,6 +151,14 @@ export default defineConfig({
           items: [
             { label: 'On Discord', slug: 'self-hosting/discord' },
             { label: 'On Fluxer', slug: 'self-hosting/fluxer' },
+            { label: 'Postgres', slug: 'self-hosting/postgres' },
+          ],
+        },
+        {
+          label: 'Apps & dashboard',
+          items: [
+            { label: 'Sylo app (iOS)', slug: 'app/ios', badge: beta },
+            { label: 'Dashboard V2', slug: 'dashboard/v2', badge: beta },
           ],
         },
         { label: 'Modules', items: modulesSidebar },
@@ -163,8 +187,15 @@ export default defineConfig({
               attrs: { target: '_blank' },
             },
             {
-              label: 'Sylo-Fluxer on GitHub',
-              link: 'https://github.com/Ferdinand99/Sylo-Fluxer',
+              label: 'TestFlight beta',
+              link: 'https://testflight.apple.com/join/6FXxPjxu',
+              attrs: { target: '_blank' },
+            },
+            {
+              // roadmap.sylobot.com (the Fider board) answered 503 when this
+              // was written, so this links Sylo's own roadmap page instead.
+              label: 'Roadmap',
+              link: 'https://app.sylobot.com/roadmap',
               attrs: { target: '_blank' },
             },
           ],

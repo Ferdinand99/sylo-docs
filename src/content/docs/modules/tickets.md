@@ -1,7 +1,9 @@
 ---
 title: Tickets (modmail)
+description: Members DM the bot; staff reply from the dashboard.
 ---
 
+<!-- Generated from Sylo's docs/modules/tickets.md by scripts/ — edit it there and re-run `npm run import`. -->
 
 Members open a ticket by **DMing the bot**. Staff read the conversation and reply
 from the dashboard — replies are delivered to the member as a DM from Sylo.
@@ -36,5 +38,5 @@ server. Staff reply as **Staff** from the ticket page; the member sees Sylo's DM
 **Close ticket** sends a final reply (or the default closing notice if the box is
 empty) and closes it. The member can open a new one by DMing again.
 
-`/forget` removes the member's ticket history and the messages they sent; staff
-replies already delivered are not clawed back.
+`/forget` removes the member's ticket history: every message in their tickets,
+staff replies included. Replies already delivered by DM are not clawed back.

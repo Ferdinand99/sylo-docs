@@ -1,7 +1,9 @@
 ---
 title: Twitch alerts
+description: Announce when a Twitch streamer goes live.
 ---
 
+<!-- Generated from Sylo's docs/modules/twitch-alerts.md by scripts/ — edit it there and re-run `npm run import`. -->
 
 Announce in a channel when a Twitch streamer goes live.
 

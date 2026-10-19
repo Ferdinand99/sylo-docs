@@ -1,7 +1,9 @@
 ---
 title: GitHub alerts
+description: Post a repo's pushes, releases, issues and pull requests to a channel.
 ---
 
+<!-- Generated from Sylo's docs/modules/github.md by scripts/ — edit it there and re-run `npm run import`. -->
 
 Post a repo's activity — pushes, releases, issues, pull requests, stars,
 forks — to a channel. Unlike every other alert module, this one is

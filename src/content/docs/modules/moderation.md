@@ -1,7 +1,9 @@
 ---
 title: Moderation
+description: Warnings, warning auto-actions, mod-log, ban/lock tools.
 ---
 
+<!-- Generated from Sylo's docs/modules/moderation.md by scripts/ — edit it there and re-run `npm run import`. -->
 
 A numbered **case log** covering every moderation action, with automatic warning
 escalation, a moderation log, and channel-lock tools. **On by default.** The

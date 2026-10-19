@@ -1,7 +1,9 @@
 ---
 title: AFK
+description: Members mark themselves away; Sylo replies to mentions.
 ---
 
+<!-- Generated from Sylo's docs/modules/afk.md by scripts/ — edit it there and re-run `npm run import`. -->
 
 Members run `/afk` to mark themselves away. Sylo replies to anyone who mentions
 them, and clears the status when they next speak.

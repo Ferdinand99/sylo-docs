@@ -1,7 +1,9 @@
 ---
 title: RSS alerts
+description: Post new items from followed RSS / Atom feeds.
 ---
 
+<!-- Generated from Sylo's docs/modules/rss.md by scripts/ — edit it there and re-run `npm run import`. -->
 
 Post a message when a followed feed publishes a new item. Handles a raw
 **RSS 2.0** or **Atom** URL, and also resolves a **Reddit**, **Mastodon** or

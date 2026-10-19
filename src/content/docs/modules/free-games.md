@@ -1,7 +1,9 @@
 ---
 title: Free games
+description: Announce games free to claim on the Epic Games Store.
 ---
 
+<!-- Generated from Sylo's docs/modules/free-games.md by scripts/ — edit it there and re-run `npm run import`. -->
 
 Announces games (and DLC) that become free to claim on the **Epic Games Store**,
 in a channel of your choice. With an optional API key it also covers other

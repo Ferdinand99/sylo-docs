@@ -1,7 +1,9 @@
 ---
 title: Leveling
+description: XP and levels from activity, role rewards, leaderboard.
 ---
 
+<!-- Generated from Sylo's docs/modules/leveling.md by scripts/ — edit it there and re-run `npm run import`. -->
 
 XP and levels from chat activity, with role rewards, per-channel/role
 multipliers, no-XP lists, and a public leaderboard.

@@ -1,7 +1,9 @@
 ---
 title: Autoresponder
+description: Auto-reply when a message matches a trigger.
 ---
 
+<!-- Generated from Sylo's docs/modules/autoresponder.md by scripts/ — edit it there and re-run `npm run import`. -->
 
 Automatically reply when a message matches a trigger phrase.
 

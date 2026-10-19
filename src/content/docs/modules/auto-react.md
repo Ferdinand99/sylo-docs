@@ -1,6 +1,9 @@
 ---
 title: Auto-react
+description: Auto-react to messages from chosen users/roles, optionally change a role too.
 ---
+
+<!-- Generated from Sylo's docs/modules/auto-react.md by scripts/ — edit it there and re-run `npm run import`. -->
 
 Automatically react — and optionally add or remove a role — when a message
 comes from a chosen user or role.

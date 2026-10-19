@@ -1,7 +1,9 @@
 ---
 title: Auto-moderation
+description: Filter invites, links, spam, caps, banned words.
 ---
 
+<!-- Generated from Sylo's docs/modules/automod.md by scripts/ — edit it there and re-run `npm run import`. -->
 
 Scans new and edited messages and acts on the first rule that matches.
 Administrators, the server owner, bot-master roles, and members with an
