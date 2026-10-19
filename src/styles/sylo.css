@@ -1,0 +1,771 @@
+/*
+  Sylo docs — the look of sylobot.com (Sylo/site/styles.css) and the V2
+  dashboard (Sylo/web-v2/src/styles.css), applied to Starlight.
+
+  How this file works with Starlight: every Starlight style lives in a cascade
+  layer (starlight.base … starlight.utils), and this file is unlayered, so any
+  rule here wins over Starlight's regardless of specificity. Colours are set
+  through Starlight's own --sl-color-* variables wherever one exists; direct
+  rules only cover what has no variable (header glass, pills, asides, cards).
+
+  Palette rules, same as the site: near-black / off-white surfaces, hairline
+  borders, Inter. The accent is for links, focus, the active sidebar marker and
+  tiny highlights only — never a large fill. Every text colour here is checked
+  for WCAG AA against the backgrounds it sits on.
+*/
+
+/* ==========================================================================
+   Tokens — dark (Starlight's default and the site's only theme)
+   ========================================================================== */
+:root {
+  /* Sylo tokens (names follow the site / V2 dashboard). */
+  --sylo-bg: #0b0b0d;
+  --sylo-bg-2: #111113;
+  --sylo-surface: #161618;
+  --sylo-line: rgba(255, 255, 255, 0.08);
+  --sylo-line-strong: rgba(255, 255, 255, 0.14);
+  --sylo-line-hover: rgba(255, 255, 255, 0.22);
+  --sylo-fill-hover: rgba(255, 255, 255, 0.06);
+  --sylo-fill-active: rgba(255, 255, 255, 0.07);
+  --sylo-text: #f5f5f7;
+  --sylo-muted: #a1a1a6;
+  --sylo-faint: #6e6e73; /* decorative only (rails, separators) — not for text */
+  --sylo-accent: #8b7dff;
+  --sylo-accent-underline: rgba(139, 125, 255, 0.4);
+  --sylo-ok: #30d158;
+  --sylo-warn: #ffd60a;
+  --sylo-bad: #ff453a;
+  --sylo-primary-bg: #f5f5f7;
+  --sylo-primary-fg: #0b0b0d;
+  --sylo-primary-hover: #ffffff;
+  --sylo-glass: rgba(11, 11, 13, 0.72);
+  --sylo-glass-solid: rgba(11, 11, 13, 0.95);
+  --sylo-aside-tint: 8%;
+
+  --sylo-radius: 20px;
+  --sylo-radius-md: 14px;
+  --sylo-radius-sm: 8px;
+
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --dur-press: 120ms;
+  --dur-ui: 200ms;
+
+  /* Starlight: greys run white (strongest) → black (page). */
+  --sl-color-white: #f5f5f7;
+  --sl-color-gray-1: #e5e5ea;
+  --sl-color-gray-2: #c7c7cc;
+  --sl-color-gray-3: #a1a1a6;
+  --sl-color-gray-4: #6e6e73;
+  --sl-color-gray-5: #2c2c2e; /* solid hairline — Starlight uses it for borders */
+  --sl-color-gray-6: #1c1c1e;
+  --sl-color-black: #0b0b0d;
+
+  --sl-color-accent-low: #1d1a33;
+  --sl-color-accent: #8b7dff;
+  --sl-color-accent-high: #c4bcff;
+
+  --sl-color-text: #f5f5f7;
+  --sl-color-text-accent: #8b7dff;
+  --sl-color-text-invert: #0b0b0d;
+  --sl-color-bg: #0b0b0d;
+  --sl-color-bg-nav: #0b0b0d;
+  --sl-color-bg-sidebar: #0b0b0d;
+  --sl-color-bg-inline-code: rgba(255, 255, 255, 0.07);
+  --sl-color-bg-accent: #8b7dff;
+  --sl-color-hairline-light: rgba(255, 255, 255, 0.08);
+  --sl-color-hairline: rgba(255, 255, 255, 0.08);
+  --sl-color-hairline-shade: rgba(255, 255, 255, 0.08);
+  --sl-color-backdrop-overlay: rgba(0, 0, 0, 0.5);
+
+  /* Flat, like the site: no stacked drop shadows. */
+  --sl-shadow-sm: none;
+  --sl-shadow-md: none;
+  --sl-shadow-lg: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 20px 40px -20px rgba(0, 0, 0, 0.6);
+
+  /* Type */
+  --sl-font: 'Inter Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    'Helvetica Neue', Arial, sans-serif;
+  --sl-font-mono: ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, Consolas, monospace;
+  --sl-text-body: 1rem;
+  --sl-line-height: 1.65;
+  --sl-line-height-headings: 1.15;
+}
+
+/* ==========================================================================
+   Tokens — light (values from the V2 dashboard's light theme)
+   ========================================================================== */
+:root[data-theme='light'] {
+  --sylo-bg: #f5f5f7;
+  --sylo-bg-2: #fbfbfd;
+  --sylo-surface: #ffffff;
+  --sylo-line: rgba(0, 0, 0, 0.08);
+  --sylo-line-strong: rgba(0, 0, 0, 0.14);
+  --sylo-line-hover: rgba(0, 0, 0, 0.22);
+  --sylo-fill-hover: rgba(0, 0, 0, 0.04);
+  --sylo-fill-active: #ffffff;
+  --sylo-text: #1d1d1f;
+  --sylo-muted: #6e6e73;
+  --sylo-faint: #86868b;
+  --sylo-accent: #6a58e3;
+  --sylo-accent-underline: rgba(106, 88, 227, 0.35);
+  --sylo-ok: #1e7f36;
+  --sylo-warn: #b25000;
+  --sylo-bad: #d70015;
+  --sylo-primary-bg: #1d1d1f;
+  --sylo-primary-fg: #ffffff;
+  --sylo-primary-hover: #000000;
+  --sylo-glass: rgba(245, 245, 247, 0.72);
+  --sylo-glass-solid: rgba(245, 245, 247, 0.95);
+  --sylo-aside-tint: 6%;
+
+  --sl-color-white: #1d1d1f;
+  --sl-color-gray-1: #2c2c2e;
+  --sl-color-gray-2: #424245;
+  --sl-color-gray-3: #6e6e73;
+  --sl-color-gray-4: #86868b;
+  --sl-color-gray-5: #d2d2d7;
+  --sl-color-gray-6: #e8e8ed;
+  --sl-color-gray-7: #fbfbfd;
+  --sl-color-black: #ffffff;
+
+  --sl-color-accent-low: #ecebff;
+  --sl-color-accent: #6a58e3;
+  --sl-color-accent-high: #4b3bc0;
+
+  --sl-color-text: #1d1d1f;
+  --sl-color-text-accent: #6a58e3;
+  --sl-color-text-invert: #ffffff;
+  --sl-color-bg: #f5f5f7;
+  --sl-color-bg-nav: #f5f5f7;
+  --sl-color-bg-sidebar: #f5f5f7;
+  --sl-color-bg-inline-code: rgba(0, 0, 0, 0.05);
+  --sl-color-bg-accent: #6a58e3;
+  --sl-color-hairline-light: rgba(0, 0, 0, 0.08);
+  --sl-color-hairline: rgba(0, 0, 0, 0.08);
+  --sl-color-hairline-shade: rgba(0, 0, 0, 0.08);
+  --sl-color-backdrop-overlay: rgba(0, 0, 0, 0.25);
+
+  --sl-shadow-lg: 0 1px 2px rgba(0, 0, 0, 0.04), 0 16px 32px -16px rgba(0, 0, 0, 0.18);
+}
+
+@media (prefers-contrast: more) {
+  :root {
+    --sylo-line: rgba(255, 255, 255, 0.24);
+    --sylo-line-strong: rgba(255, 255, 255, 0.4);
+    --sylo-muted: #c7c7cc;
+    --sl-color-hairline-light: rgba(255, 255, 255, 0.24);
+    --sl-color-hairline: rgba(255, 255, 255, 0.24);
+    --sl-color-hairline-shade: rgba(255, 255, 255, 0.24);
+  }
+  :root[data-theme='light'] {
+    --sylo-line: rgba(0, 0, 0, 0.24);
+    --sylo-line-strong: rgba(0, 0, 0, 0.4);
+    --sylo-muted: #48484a;
+    --sl-color-hairline-light: rgba(0, 0, 0, 0.24);
+    --sl-color-hairline: rgba(0, 0, 0, 0.24);
+    --sl-color-hairline-shade: rgba(0, 0, 0, 0.24);
+  }
+}
+
+/* ==========================================================================
+   Base & typography
+   ========================================================================== */
+body {
+  font-optical-sizing: auto;
+  font-feature-settings: 'cv11', 'ss03';
+  -moz-osx-font-smoothing: grayscale;
+}
+::selection {
+  background: rgba(139, 125, 255, 0.35);
+}
+:focus-visible {
+  outline: 2px solid var(--sylo-accent);
+  outline-offset: 3px;
+}
+
+/* Headings: weight + tight tracking that loosens as the size drops. */
+.sl-markdown-content :is(h1, h2, h3, h4, h5, h6),
+h1#_top {
+  font-weight: 650;
+  text-wrap: balance;
+}
+h1#_top,
+.sl-markdown-content h1 {
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+}
+.sl-markdown-content h2 {
+  letter-spacing: -0.02em;
+}
+.sl-markdown-content h3 {
+  font-weight: 600;
+  letter-spacing: -0.015em;
+}
+.sl-markdown-content :is(h4, h5, h6) {
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.sl-markdown-content :is(p, li, dd, blockquote) {
+  text-wrap: pretty;
+}
+
+/* Content links — accent with a soft underline that firms up on hover. */
+.sl-markdown-content a:not(:where(.not-content *, .sl-link-button)) {
+  color: var(--sylo-accent);
+  text-decoration-line: underline;
+  text-decoration-color: var(--sylo-accent-underline);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  transition: text-decoration-color var(--dur-ui) ease;
+}
+@media (hover: hover) and (pointer: fine) {
+  .sl-markdown-content a:not(:where(.not-content *, .sl-link-button)):hover {
+    color: var(--sylo-accent);
+    text-decoration-color: currentColor;
+  }
+}
+
+/* Inline code */
+.sl-markdown-content code:not(:where(.not-content *)) {
+  border-radius: 6px;
+  font-size: 0.875em;
+  padding: 0.1em 0.35em;
+}
+.sl-markdown-content :is(h1, h2, h3, h4, h5, h6) code {
+  font-size: 0.9em;
+}
+
+kbd {
+  font-family: var(--__sl-font);
+}
+
+/* Tables — hairlines only, quiet header row. */
+.sl-markdown-content :is(th, td):not(:where(.not-content *)) {
+  border-bottom: 1px solid var(--sylo-line);
+  padding: 0.625rem 1rem;
+}
+.sl-markdown-content th:not(:where(.not-content *)) {
+  border-bottom-color: var(--sylo-line-strong);
+  color: var(--sylo-muted);
+  font-size: var(--sl-text-sm);
+  font-weight: 600;
+}
+.sl-markdown-content td:not(:where(.not-content *)) {
+  font-variant-numeric: tabular-nums;
+}
+
+.sl-markdown-content blockquote:not(:where(.not-content *)) {
+  border-inline-start: 2px solid var(--sylo-line-strong);
+  color: var(--sylo-muted);
+}
+.sl-markdown-content hr:not(:where(.not-content *)) {
+  border-bottom-color: var(--sylo-line);
+}
+
+/* <details> in content: hairline rule instead of the thick left bar. */
+.sl-markdown-content details:not(:where(.not-content *)) {
+  border-inline-start: 0;
+  border-block: 1px solid var(--sylo-line);
+  padding-inline-start: 0;
+}
+.sl-markdown-content details + details:not(:where(.not-content *)) {
+  margin-top: 0;
+  border-top: 0;
+}
+.sl-markdown-content summary:not(:where(.not-content *)) {
+  padding-block: 0.75rem;
+  -webkit-tap-highlight-color: transparent;
+}
+.sl-markdown-content summary:not(:where(.not-content *))::before {
+  color: var(--sylo-muted);
+  transition: transform var(--dur-ui) var(--ease-out);
+}
+.sl-markdown-content details[open] > summary:not(:where(.not-content *)) {
+  margin-bottom: 0.25rem;
+}
+.sl-markdown-content details:not(:where(.not-content *)) > :last-child:not(summary) {
+  padding-bottom: 1rem;
+}
+
+/* ==========================================================================
+   Header — glass bar like the site nav, on a pseudo-element so the
+   backdrop-filter never becomes a containing block for the header's content.
+   ========================================================================== */
+header.header {
+  background-color: transparent;
+  border-bottom: 0;
+}
+header.header::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: var(--sylo-glass);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid var(--sylo-line);
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  header.header::before {
+    background: var(--sylo-glass-solid);
+  }
+}
+@media (prefers-reduced-transparency: reduce) {
+  header.header::before {
+    background: var(--sylo-bg);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
+.site-title {
+  gap: 0.625rem;
+  color: var(--sylo-text);
+  font-size: 1.0625rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+.site-title img {
+  height: 28px;
+  border-radius: 7px;
+}
+
+/* Social + theme controls: muted, brighten on fine-pointer hover only. */
+.social-icons a,
+starlight-theme-select label {
+  color: var(--sylo-muted);
+  transition: color var(--dur-ui) ease;
+}
+.social-icons::after {
+  border-inline-end-color: var(--sylo-line-strong);
+}
+@media (hover: hover) and (pointer: fine) {
+  .social-icons a:hover,
+  starlight-theme-select label:hover {
+    color: var(--sylo-text);
+  }
+}
+
+/* Search — a hairline pill. */
+button[data-open-modal] {
+  color: var(--sylo-muted);
+  transition:
+    color var(--dur-ui) ease,
+    border-color var(--dur-ui) ease,
+    background-color var(--dur-ui) ease;
+}
+@media (min-width: 50rem) {
+  button[data-open-modal] {
+    height: 2.25rem;
+    border: 1px solid var(--sylo-line-strong);
+    border-radius: 999px;
+    padding-inline: 0.875rem 0.375rem;
+    background-color: transparent;
+    color: var(--sylo-muted);
+  }
+  button[data-open-modal] > kbd {
+    border-radius: 999px;
+    padding-inline: 0.5rem;
+    background-color: var(--sylo-fill-hover);
+    color: var(--sylo-muted);
+  }
+}
+@media (hover: hover) and (pointer: fine) {
+  button[data-open-modal]:hover {
+    border-color: var(--sylo-line-hover);
+    background-color: var(--sylo-fill-hover);
+    color: var(--sylo-text);
+  }
+}
+
+/* Search dialog — surface card, hairline, soft ambient shadow. */
+site-search dialog {
+  background-color: var(--sylo-surface);
+  border: 1px solid var(--sylo-line-strong);
+}
+@media (min-width: 50rem) {
+  site-search dialog {
+    border-radius: var(--sylo-radius-md);
+  }
+}
+#starlight__search {
+  --pagefind-ui-background: var(--sylo-bg-2);
+  --pagefind-ui-border: var(--sylo-line-strong);
+  --pagefind-ui-tag: var(--sylo-fill-hover);
+  --pagefind-ui-border-radius: 10px;
+}
+
+/* Mobile menu button: hairline circle instead of a white disc with a shadow. */
+.sl-menu-button,
+:root[data-theme='light'] .sl-menu-button {
+  border: 1px solid var(--sylo-line-strong);
+  background-color: var(--sylo-surface);
+  color: var(--sylo-text);
+  box-shadow: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform var(--dur-press) var(--ease-out);
+}
+.sl-menu-button:active {
+  transform: scale(0.97);
+}
+.sl-menu-button:has(~ :popover-open),
+:root[data-theme='light'] .sl-menu-button:has(~ :popover-open) {
+  background-color: var(--sylo-fill-hover);
+}
+
+/* ==========================================================================
+   Sidebar — quiet group labels; the current page is a surface pill with an
+   accent marker on the rail. Plain text colour, so the accent stays small.
+   ========================================================================== */
+.sidebar-pane {
+  background-color: var(--sl-color-bg-sidebar);
+}
+.sidebar-content summary {
+  -webkit-tap-highlight-color: transparent;
+}
+.sidebar-content .group-label .large {
+  color: var(--sylo-muted);
+  font-size: var(--sl-text-sm);
+  font-weight: 600;
+  letter-spacing: -0.005em;
+}
+.sidebar-content ul ul .group-label .large {
+  font-weight: 500;
+}
+.sidebar-content .caret {
+  color: var(--sylo-faint);
+  transition: transform var(--dur-ui) var(--ease-out);
+}
+.sidebar-content ul ul li {
+  border-inline-start-color: var(--sylo-line);
+}
+.sidebar-content a {
+  border-radius: var(--sylo-radius-sm);
+  color: var(--sylo-muted);
+  transition:
+    color var(--dur-ui) ease,
+    background-color var(--dur-ui) ease;
+}
+.sidebar-content a:focus {
+  color: var(--sylo-muted);
+}
+.sidebar-content a[aria-current='page'],
+.sidebar-content a[aria-current='page']:hover,
+.sidebar-content a[aria-current='page']:focus {
+  background-color: var(--sylo-fill-active);
+  color: var(--sylo-text);
+  font-weight: 550;
+}
+:root[data-theme='light'] .sidebar-content a[aria-current='page'] {
+  box-shadow: 0 0 0 1px var(--sylo-line);
+}
+.sidebar-content li:has(> a[aria-current='page']) {
+  border-inline-start-color: var(--sylo-accent);
+}
+@media (hover: hover) and (pointer: fine) {
+  .sidebar-content a:hover {
+    background-color: var(--sylo-fill-hover);
+    color: var(--sylo-text);
+  }
+}
+
+/* Right-hand "On this page" + mobile TOC */
+.right-sidebar-panel h2 {
+  color: var(--sylo-text);
+  font-size: var(--sl-text-sm);
+  letter-spacing: -0.005em;
+}
+.right-sidebar-panel a {
+  color: var(--sylo-muted);
+  transition: color var(--dur-ui) ease;
+}
+.right-sidebar-panel a[aria-current='true'] {
+  color: var(--sylo-accent);
+}
+@media (hover: hover) and (pointer: fine) {
+  .right-sidebar-panel a:hover {
+    color: var(--sylo-text);
+  }
+  .right-sidebar-panel a[aria-current='true']:hover {
+    color: var(--sylo-accent);
+  }
+}
+mobile-starlight-toc nav {
+  background-color: var(--sylo-glass-solid);
+  border-top-color: var(--sylo-line);
+}
+mobile-starlight-toc summary {
+  border-bottom-color: var(--sylo-line);
+}
+mobile-starlight-toc .toggle {
+  border-color: var(--sylo-line-strong);
+  border-radius: 999px;
+  background-color: transparent;
+  color: var(--sylo-muted);
+}
+mobile-starlight-toc details[open] .toggle {
+  border-color: var(--sylo-line-hover);
+  color: var(--sylo-text);
+}
+mobile-starlight-toc .dropdown {
+  border-color: var(--sylo-line-strong);
+  background-color: var(--sylo-surface);
+}
+
+/* Edit link, last updated, footer meta */
+.meta,
+.kudos {
+  color: var(--sylo-muted);
+}
+
+/* Prev / next — flat hairline cards. */
+.pagination-links a {
+  border: 1px solid var(--sylo-line-strong);
+  border-radius: var(--sylo-radius-md);
+  box-shadow: none;
+  color: var(--sylo-muted);
+  transition:
+    border-color var(--dur-ui) ease,
+    background-color var(--dur-ui) ease;
+}
+.pagination-links .link-title {
+  color: var(--sylo-text);
+  font-size: var(--sl-text-xl);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+}
+@media (hover: hover) and (pointer: fine) {
+  .pagination-links a:hover {
+    border-color: var(--sylo-line-hover);
+    background-color: var(--sylo-fill-hover);
+  }
+}
+
+/* ==========================================================================
+   Asides — tinted surface and a hairline in the aside's colour; no thick bar.
+   ========================================================================== */
+.starlight-aside {
+  --sylo-aside-color: var(--sylo-accent);
+  border: 1px solid color-mix(in srgb, var(--sylo-aside-color) 28%, transparent);
+  border-radius: var(--sylo-radius-md);
+  padding: 1rem 1.125rem;
+  background-color: color-mix(in srgb, var(--sylo-aside-color) var(--sylo-aside-tint), var(--sylo-bg));
+  color: var(--sylo-text);
+  --sl-color-asides-text-accent: var(--sylo-aside-color);
+  --sl-color-asides-border: color-mix(in srgb, var(--sylo-aside-color) 28%, transparent);
+}
+:root[data-theme='light'] .starlight-aside {
+  background-color: color-mix(
+    in srgb,
+    var(--sylo-aside-color) var(--sylo-aside-tint),
+    var(--sylo-surface)
+  );
+}
+.starlight-aside--note {
+  --sylo-aside-color: var(--sylo-accent);
+}
+.starlight-aside--tip {
+  --sylo-aside-color: var(--sylo-ok);
+}
+.starlight-aside--caution {
+  --sylo-aside-color: var(--sylo-warn);
+}
+.starlight-aside--danger {
+  --sylo-aside-color: var(--sylo-bad);
+}
+.starlight-aside__title {
+  font-size: var(--sl-text-base);
+  letter-spacing: -0.01em;
+}
+.starlight-aside__icon {
+  font-size: 1.125em;
+}
+.starlight-aside__content a {
+  text-decoration-color: color-mix(in srgb, currentColor 40%, transparent);
+}
+
+/* ==========================================================================
+   Cards (home page) — flat surface, hairline, no colour boxes, no lift.
+   ========================================================================== */
+.card {
+  border: 1px solid var(--sylo-line);
+  border-radius: var(--sylo-radius);
+  background-color: var(--sylo-surface);
+  padding: clamp(1.25rem, calc(0.5rem + 2vw), 1.75rem);
+  gap: 0.5rem;
+}
+.card .title {
+  color: var(--sylo-text);
+  font-size: var(--sl-text-lg);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  gap: 0.625rem;
+}
+.card .icon {
+  border: 0;
+  background: none;
+  padding: 0;
+  color: var(--sylo-accent);
+  font-size: 1.125em;
+}
+.card .body {
+  color: var(--sylo-muted);
+  font-size: var(--sl-text-body);
+}
+.card .body > :is(p, div) + :is(p, div) {
+  margin-top: 0.75rem;
+}
+
+.sl-link-card,
+.sl-markdown-content .sl-link-card {
+  border: 1px solid var(--sylo-line);
+  border-radius: var(--sylo-radius-md);
+  background-color: var(--sylo-surface);
+  box-shadow: none;
+}
+
+/* ==========================================================================
+   Buttons — the site's .btn: white-on-dark primary pill (black-on-light in
+   light mode), hairline secondary pill, 0.97 press.
+   ========================================================================== */
+.sl-link-button {
+  min-height: 44px;
+  padding: 0 22px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1;
+  white-space: nowrap;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    transform var(--dur-press) var(--ease-out),
+    background-color var(--dur-ui) ease,
+    border-color var(--dur-ui) ease,
+    color var(--dur-ui) ease;
+}
+@media (min-width: 50rem) {
+  .sl-link-button {
+    padding: 0 22px;
+    font-size: 1rem;
+  }
+}
+.sl-link-button:active {
+  transform: scale(0.97);
+}
+.sl-link-button svg {
+  font-size: 1.125rem; /* Icon sets --sl-icon-size inline, so size it directly */
+  transition: transform var(--dur-ui) var(--ease-out);
+}
+.sl-link-button.primary,
+.sl-link-button.primary:hover {
+  background: var(--sylo-primary-bg);
+  border-color: var(--sylo-primary-bg);
+  color: var(--sylo-primary-fg);
+}
+.sl-link-button.secondary,
+.sl-link-button.secondary:hover {
+  background: transparent;
+  border-color: var(--sylo-line-strong);
+  color: var(--sylo-text);
+}
+.sl-link-button.minimal {
+  min-height: 44px;
+  padding-inline: 0;
+  color: var(--sylo-accent);
+}
+@media (hover: hover) and (pointer: fine) {
+  .sl-link-button.primary:hover {
+    background: var(--sylo-primary-hover);
+    border-color: var(--sylo-primary-hover);
+  }
+  .sl-link-button.secondary:hover {
+    background: var(--sylo-fill-hover);
+    border-color: var(--sylo-line-hover);
+  }
+  .sl-link-button:hover svg {
+    transform: translateX(3px);
+  }
+}
+
+/* ==========================================================================
+   Splash hero — flat, no glow: big tight type, muted tagline, pills.
+   ========================================================================== */
+.hero {
+  gap: 2rem;
+}
+.hero > img {
+  width: min(56%, 12rem);
+  border-radius: 22%;
+}
+.hero h1 {
+  color: var(--sylo-text);
+  font-size: clamp(2.5rem, calc(1rem + 5vw), 4rem);
+  font-weight: 650;
+  line-height: 1.04;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+}
+.hero .tagline {
+  color: var(--sylo-muted);
+  font-size: clamp(1.0625rem, calc(0.75rem + 1vw), 1.25rem);
+  line-height: 1.5;
+  text-wrap: pretty;
+}
+.hero .actions {
+  gap: 12px;
+}
+@media (min-width: 50rem) {
+  .hero {
+    grid-template-columns: 7fr 3fr;
+    padding-block: clamp(2.5rem, calc(1rem + 8vmin), 7rem);
+  }
+  .hero > img {
+    width: min(100%, 14rem);
+  }
+}
+
+/* ==========================================================================
+   Motion — <details> open/close with real height where supported (same as
+   the site's FAQ); instant everywhere else.
+   ========================================================================== */
+@supports (interpolate-size: allow-keywords) {
+  :root {
+    interpolate-size: allow-keywords;
+  }
+  .sl-markdown-content details:not(:where(.not-content *))::details-content,
+  .sidebar-content details::details-content {
+    block-size: 0;
+    overflow: hidden;
+    transition:
+      block-size 250ms var(--ease-out),
+      content-visibility 250ms var(--ease-out) allow-discrete;
+  }
+  .sl-markdown-content details[open]:not(:where(.not-content *))::details-content,
+  .sidebar-content details[open]::details-content {
+    block-size: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sl-link-button:active,
+  .sl-menu-button:active {
+    transform: none;
+  }
+  .sl-link-button svg,
+  .sidebar-content .caret,
+  .sl-markdown-content summary::before {
+    transition: none;
+  }
+  .sl-link-button:hover svg {
+    transform: none;
+  }
+  .sl-markdown-content details::details-content,
+  .sidebar-content details::details-content {
+    transition: none;
+  }
+}
