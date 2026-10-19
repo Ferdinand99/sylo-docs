@@ -81,6 +81,47 @@ export default defineConfig({
     starlight({
       title: 'Sylo docs',
       logo: { src: './src/assets/sylo-icon.webp', replacesTitle: false },
+      // The look of sylobot.com: self-hosted Inter (variable, with optical
+      // sizes) plus Sylo's palette mapped onto Starlight's --sl-* variables.
+      customCss: ['@fontsource-variable/inter/opsz.css', './src/styles/sylo.css'],
+      // Neutral GitHub syntax themes; the frame chrome uses the site's
+      // surfaces — hairline border, 14px radius, no shadow, Inter for UI text.
+      // Colours are literal per theme (not CSS vars) so Expressive Code can
+      // still derive contrast-safe colours from them.
+      expressiveCode: {
+        themes: ['github-dark-default', 'github-light-default'],
+        styleOverrides: {
+          borderRadius: '14px',
+          borderWidth: '1px',
+          borderColor: ({ theme }) => (theme.type === 'dark' ? '#ffffff24' : '#00000024'),
+          codeBackground: ({ theme }) => (theme.type === 'dark' ? '#111113' : '#ffffff'),
+          uiFontFamily: 'var(--__sl-font)',
+          frames: {
+            terminalBackground: ({ theme }) => (theme.type === 'dark' ? '#111113' : '#ffffff'),
+            editorTabBarBackground: ({ theme }) => (theme.type === 'dark' ? '#161618' : '#fbfbfd'),
+            editorActiveTabBackground: ({ theme }) =>
+              theme.type === 'dark' ? '#111113' : '#ffffff',
+            editorActiveTabForeground: ({ theme }) =>
+              theme.type === 'dark' ? '#f5f5f7' : '#1d1d1f',
+            editorActiveTabIndicatorTopColor: 'transparent',
+            editorActiveTabIndicatorBottomColor: 'transparent',
+            editorTabBarBorderBottomColor: ({ theme }) =>
+              theme.type === 'dark' ? '#ffffff14' : '#00000014',
+            terminalTitlebarBackground: ({ theme }) =>
+              theme.type === 'dark' ? '#161618' : '#fbfbfd',
+            terminalTitlebarForeground: ({ theme }) =>
+              theme.type === 'dark' ? '#a1a1a6' : '#6e6e73',
+            terminalTitlebarBorderBottomColor: ({ theme }) =>
+              theme.type === 'dark' ? '#ffffff14' : '#00000014',
+            terminalTitlebarDotsForeground: ({ theme }) =>
+              theme.type === 'dark' ? '#ffffff' : '#000000',
+            terminalTitlebarDotsOpacity: '0.18',
+            inlineButtonForeground: ({ theme }) => (theme.type === 'dark' ? '#f5f5f7' : '#1d1d1f'),
+            shadowColor: 'transparent',
+            frameBoxShadowCssValue: 'none',
+          },
+        },
+      },
       social: [
         { icon: 'discord', label: 'Discord', href: 'https://discord.gg/GAzR9k5hhS' },
         { icon: 'github', label: 'Sylo on GitHub', href: 'https://github.com/Ferdinand99/Sylo' },
