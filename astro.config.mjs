@@ -192,8 +192,8 @@ export default defineConfig({
               attrs: { target: '_blank' },
             },
             {
-              // roadmap.sylobot.com (the Fider board) answered 503 when this
-              // was written, so this links Sylo's own roadmap page instead.
+              // The roadmap is built into Sylo's own dashboard (the old Fider
+              // board at roadmap.sylobot.com is retired).
               label: 'Roadmap',
               link: 'https://app.sylobot.com/roadmap',
               attrs: { target: '_blank' },
