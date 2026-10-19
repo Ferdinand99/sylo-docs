@@ -1,7 +1,9 @@
 ---
 title: Welcome channel
+description: One rich pinned message for a read-only welcome channel.
 ---
 
+<!-- Generated from Sylo's docs/modules/welcome-channel.md by scripts/ — edit it there and re-run `npm run import`. -->
 
 Build one rich, pinned message for a dedicated read-only `#welcome` channel — a
 static "start here" board, separate from the per-join [Welcome & leave](/modules/welcome/)

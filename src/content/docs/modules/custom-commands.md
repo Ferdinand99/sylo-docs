@@ -1,7 +1,9 @@
 ---
 title: Custom commands
+description: Build /slash commands from an action list.
 ---
 
+<!-- Generated from Sylo's docs/modules/custom-commands.md by scripts/ — edit it there and re-run `npm run import`. -->
 
 Build your own `/slash` commands from an ordered list of actions.
 

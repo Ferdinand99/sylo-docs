@@ -1,7 +1,9 @@
 ---
 title: Reminders
+description: Post a message to a channel once or on a schedule.
 ---
 
+<!-- Generated from Sylo's docs/modules/reminders.md by scripts/ — edit it there and re-run `npm run import`. -->
 
 Post a text or embed message to a channel — once at a set time, or on a repeating
 interval. (The dashboard calls this "Reminders"; the older id is

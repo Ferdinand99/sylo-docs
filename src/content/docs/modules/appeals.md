@@ -1,7 +1,9 @@
 ---
 title: Ban appeals
+description: DM banned members an appeal form; staff decide from the dashboard.
 ---
 
+<!-- Generated from Sylo's docs/modules/appeals.md by scripts/ — edit it there and re-run `npm run import`. -->
 
 When Sylo bans a member (via `/ban` or a warning auto-action), it DMs them a link
 to an appeal form. Staff read submissions and accept or deny them from the

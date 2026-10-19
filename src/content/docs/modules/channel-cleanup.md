@@ -1,7 +1,9 @@
 ---
 title: Channel cleanup
+description: Auto-delete old messages from a channel on a weekly schedule.
 ---
 
+<!-- Generated from Sylo's docs/modules/channel-cleanup.md by scripts/ — edit it there and re-run `npm run import`. -->
 
 Auto-delete old messages from a channel, on a weekly schedule you pick. Deletes
 only messages older than a configured age — not a full wipe.

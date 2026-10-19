@@ -1,7 +1,9 @@
 ---
 title: Birthdays
+description: Members save a birthday; Sylo greets them and can grant a role.
 ---
 
+<!-- Generated from Sylo's docs/modules/birthdays.md by scripts/ — edit it there and re-run `npm run import`. -->
 
 Members save their birthday with `/birthday`; once a day Sylo posts a greeting in
 a configured channel and can grant a **birthday role** for the day.

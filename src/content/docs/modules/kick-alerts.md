@@ -1,7 +1,9 @@
 ---
 title: Kick alerts
+description: Announce when a Kick.com streamer goes live.
 ---
 
+<!-- Generated from Sylo's docs/modules/kick-alerts.md by scripts/ — edit it there and re-run `npm run import`. -->
 
 Announce in a channel when a [Kick.com](https://kick.com) streamer goes live.
 

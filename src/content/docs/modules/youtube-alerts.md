@@ -1,7 +1,9 @@
 ---
 title: YouTube alerts
+description: Announce a channel's new uploads and going live.
 ---
 
+<!-- Generated from Sylo's docs/modules/youtube-alerts.md by scripts/ — edit it there and re-run `npm run import`. -->
 
 Announce a YouTube channel's new uploads, and when it goes live.
 

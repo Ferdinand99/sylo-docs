@@ -1,17 +1,18 @@
 ---
 title: Self-host on Discord
-description: Install, configure, reverse-proxy, back up and upgrade a self-hosted Sylo Discord bot.
+description: Install, configure, reverse-proxy, back up and upgrade a self-hosted Sylo — the bot and the dashboard in one container.
 ---
 
+<!-- Generated from Sylo's docs/self-hosting.md by scripts/ — edit it there and re-run `npm run import`. -->
 
 Everything needed to run your own instance: install, configuration, a reverse
 proxy, upgrades and rollback, and a troubleshooting table. For what each feature
-does, see [the module docs](/modules/moderation/).
+does, see [Modules](/modules/).
 
 Sylo is a single Node 22 process — the Discord bot and the web dashboard in one.
 No build step. All state is one SQLite file under a mounted data directory by
 default — that's the right choice for nearly everyone; see
-[docs/postgres.md](https://github.com/Ferdinand99/Sylo/blob/main/docs/postgres.md) if you're running at hosted scale and want
+[Postgres (optional)](/self-hosting/postgres/) if you're running at hosted scale and want
 the optional Postgres backend instead.
 
 ## Quick start
@@ -43,7 +44,9 @@ register` re-syncs commands without a restart.
 
 ## Environment variables
 
-Only `DISCORD_TOKEN` and `DISCORD_CLIENT_ID` are required.
+Only `DISCORD_TOKEN` and `DISCORD_CLIENT_ID` are required, unless you run on
+[Fluxer](/self-hosting/fluxer/) only: then `FLUXER_TOKEN` and `FLUXER_CLIENT_ID` replace them.
+At least one platform must be configured.
 
 | Variable                  | Default                         | Description |
 |---------------------------|---------------------------------|-------------|
@@ -51,11 +54,28 @@ Only `DISCORD_TOKEN` and `DISCORD_CLIENT_ID` are required.
 | `DISCORD_CLIENT_ID`       | —                               | Application (client) id (**required**) |
 | `DISCORD_DEV_GUILD_IDS`   | —                               | Register commands instantly to one or more servers (comma/space-separated) instead of globally. Old name `DISCORD_GUILD_ID` still works (warns). |
 | `DISCORD_SHARD_COUNT`     | `auto`                          | Internal gateway shards for this one process. `auto` follows Discord's recommendation and stays at 1 below ~2,500 servers; pin an integer to override. Multi-process sharding is not supported. |
+| `FLUXER_TOKEN`            | —                               | Optional: bot token for [Fluxer](/self-hosting/fluxer/). Setting it runs Sylo on Fluxer too (experimental) |
+| `FLUXER_CLIENT_ID`        | —                               | Fluxer application id (**required** with `FLUXER_TOKEN`) |
+| `FLUXER_WEB_URL`          | hosted Fluxer                   | Web app origin of a self-hosted Fluxer instance, e.g. `https://chat.example.com` |
+| `COMMAND_PREFIX`          | `!`                             | Chat prefix for commands on Fluxer, which has no slash commands (1–5 characters) |
+| `APPLE_KEY_ID`            | —                               | Optional: App Store Connect API key id for the owner-only [App Store Connect module](/modules/apple-connect/) |
+| `APPLE_ISSUER_ID`         | —                               | Issuer id of a team API key (leave unset for an individual key) |
+| `APPLE_PRIVATE_KEY`       | —                               | The key's `.p8` file: PEM text, PEM on one line with literal `\n`, or base64 |
+| `APPLE_VENDOR_NUMBER`     | —                               | Optional vendor number for a planned daily downloads digest |
+| `TRUST_PROXY`             | one private hop with `DASHBOARD_URL` | Which proxies may set `X-Forwarded-For`: `false`, a hop count, or addresses/subnets. See [Behind a reverse proxy](#behind-a-reverse-proxy) |
+| `ALLOW_PRIVATE_URLS`      | `false`                         | Let server admins use feed and image URLs on private, loopback or link-local addresses (your own network). Off by default: those URLs are fetched by the server |
+| `PUSH_RELAY_URL`          | `https://app.sylobot.com`       | Where this instance sends [Sylo app notifications](/app/ios/#notifications); empty turns them off |
+| `APNS_KEY_ID`             | —                               | Only for the instance that talks to Apple itself (the hosted Sylo): APNs auth key id |
+| `APNS_TEAM_ID`            | —                               | The Apple developer team id that owns the key |
+| `APNS_PRIVATE_KEY`        | —                               | The APNs key's `.p8` file: PEM text, PEM on one line with literal `\n`, or base64 |
+| `APNS_TOPIC`              | `net.opland.sylo`               | The app's bundle id |
+| `FLUXER_CLIENT_SECRET`    | —                               | Adds "Log in with Fluxer" to the dashboard |
+| `FLUXER_OWNER_IDS`        | —                               | Your Fluxer user id(s); the Fluxer counterpart of `OWNER_IDS` |
 | `WEB_PORT`                | `3000`                          | Dashboard HTTP port |
 | `DISCORD_CLIENT_SECRET`   | —                               | Set to require "Log in with Discord" on the dashboard |
 | `SESSION_SECRET`          | random                          | Signs the session cookie; pin it so logins survive restarts |
 | `OWNER_IDS`               | —                               | Your Discord user id(s), comma/space-separated. Gates `/health` to just these accounts when `DISCORD_CLIENT_SECRET` is set — everyone else is blocked, not just non-admins |
-| `DEV_LOG_CHANNEL_ID`      | —                               | A channel id Sylo posts its own errors to — a "dev-log", separate from any per-guild logging/modlog channel. Optional; without it there's no proactive notification |
+| `DEV_LOG_CHANNEL_ID`      | —                               | A channel id Sylo posts its own errors to — a "dev-log", separate from any per-guild logging/modlog channel. Optional: errors and warnings are stored either way, and the [Sylo app](/app/ios/#health-and-the-dev-log-operators) shows them and can notify operators |
 | `DASHBOARD_URL`           | derived                         | Public dashboard URL; needed behind a reverse proxy and for verification-captcha / ban-appeal links |
 | `TURNSTILE_SITE_KEY`      | —                               | Cloudflare Turnstile site key — enables the Verification captcha mode |
 | `TURNSTILE_SECRET_KEY`    | —                               | Cloudflare Turnstile secret key (pair with the site key) |
@@ -65,7 +85,7 @@ Only `DISCORD_TOKEN` and `DISCORD_CLIENT_ID` are required.
 | `GAMETOOLS_API_BASE`      | `https://api.gametools.network` | Stats API base URL |
 | `STATS_CACHE_TTL_MINUTES` | `5`                             | How long stats lookups are cached |
 | `DATABASE_PATH`           | `./data/sylo.db`                | SQLite file path |
-| `DATABASE_URL`            | —                               | Optional: a `postgres://` URL to use Postgres instead of SQLite. Hosted-scale deployments only — see [docs/postgres.md](https://github.com/Ferdinand99/Sylo/blob/main/docs/postgres.md). Unset (default) means nothing about the setup below changes. |
+| `DATABASE_URL`            | —                               | Optional: a `postgres://` URL to use Postgres instead of SQLite. Hosted-scale deployments only — see [Postgres (optional)](/self-hosting/postgres/). Unset (default) means nothing about the setup below changes. |
 | `BACKUP_INTERVAL_HOURS`   | `24`                            | Scheduled DB snapshot interval; `0` disables it (pre-migration + manual still run) |
 | `BACKUP_RETENTION`        | `14`                            | How many DB snapshots to keep in `<data>/backups` |
 | `BACKUP_DIR`              | `<db dir>/backups`              | Where DB snapshots are written |
@@ -116,6 +136,9 @@ Discord's approval for Message Content.
 
 ## Dashboard authentication
 
+> Running on Fluxer too? The login steps for it (client secret, redirect URL,
+> `FLUXER_OWNER_IDS`, linking both accounts) are in [Sylo on Fluxer](/self-hosting/fluxer/#dashboard-login).
+
 By default the dashboard runs **open** (no login) — only safe on `localhost` or a
 trusted LAN. Even in open mode a same-origin check blocks cross-site form posts.
 
@@ -151,6 +174,20 @@ Nextcloud folder) or `BACKUP_WEBHOOK_URL` (a Discord webhook; attachments over
 ~8 MiB are skipped). Uploads are best-effort and logged; they never hold up the
 local backup. The Health page shows which targets are active.
 
+An off-site copy is the whole database (webhook secrets, ticket text, push
+tokens). Set `BACKUP_ENCRYPTION_KEY` to a long passphrase and each copy leaves
+encrypted (AES-256-GCM, `<name>.db.gz.enc`). Keep the passphrase somewhere other
+than the server: without it the copies cannot be read. To restore one, decrypt it
+first, then restore the `.db` file as usual:
+
+```bash
+BACKUP_ENCRYPTION_KEY='your passphrase' node scripts/decrypt-backup.js sylo-2026-10-17.db.gz.enc
+```
+
+With `BACKUP_WEBDAV_USER` set, `BACKUP_WEBDAV_URL` must be `https://` (or an
+address on your own network, such as a container name or a `192.168.x.x`
+address): Basic auth over plain http sends the password in clear text.
+
 ---
 
 ## Behind a reverse proxy
@@ -160,9 +197,24 @@ then trusts one proxy hop (`X-Forwarded-*`), which it needs for correct client
 IPs (rate limiting) and OAuth redirects. Make sure the OAuth **redirect** in the
 Developer Portal matches `<DASHBOARD_URL>/auth/discord/callback`.
 
+Exactly one hop: with two proxies in a row (for example Cloudflare in front of
+nginx), every request looks like it comes from the inner proxy, so all clients
+share one rate-limit bucket. Put only one HTTP proxy in front of Sylo.
+
+The proxy must connect from this machine or the local network (a loopback or
+private address, such as another container). `X-Forwarded-For` from any other
+address is ignored, so a client that reaches Sylo's port directly cannot choose
+its own IP. For another setup, set `TRUST_PROXY`: `false`, a hop count, or the
+proxy's addresses or subnets (comma-separated, as Express takes them).
+
+Without a login (open mode), the dashboard only answers on local names and
+addresses (`localhost`, an IP address, a name without dots, `.local`, `.lan`,
+`.home.arpa`, `.internal`) and on the host in `DASHBOARD_URL`. That blocks other
+websites from reaching it through DNS rebinding.
+
 **Caddy**
 
-```caddyfile
+```caddy
 sylo.example.com {
     reverse_proxy 127.0.0.1:3000
 }
@@ -185,7 +237,7 @@ server {
 }
 ```
 
-```ini
+```env
 DASHBOARD_URL=https://sylo.example.com
 ```
 
@@ -267,7 +319,7 @@ silent corruption.
 
 All state is one SQLite file (`data/sylo.db` + `-wal` / `-shm` sidecars) —
 this section assumes that default setup. Running with `DATABASE_URL` set
-instead? See [docs/postgres.md](https://github.com/Ferdinand99/Sylo/blob/main/docs/postgres.md#backups-and-restore-on-postgres)
+instead? See [Postgres (optional)](/self-hosting/postgres/#backups-and-restore-on-postgres)
 — the same buttons and flow, `pg_dump`/`pg_restore` under the hood.
 
 **Automatic snapshots** are written to `data/backups/`: one before any schema

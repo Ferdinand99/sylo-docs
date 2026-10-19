@@ -1,7 +1,9 @@
 ---
 title: Server statistics
+description: Voice channels named with live member/role/boost counts.
 ---
 
+<!-- Generated from Sylo's docs/modules/server-stats.md by scripts/ — edit it there and re-run `npm run import`. -->
 
 Keeps voice-channel names updated with live counts — total members, humans, bots,
 a role's member count, or the boost count. MEE6-style "stat channels".

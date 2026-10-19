@@ -1,7 +1,9 @@
 ---
 title: Invite tracker
+description: Track who invited each member; inviter leaderboard.
 ---
 
+<!-- Generated from Sylo's docs/modules/invite-tracker.md by scripts/ — edit it there and re-run `npm run import`. -->
 
 Records which invite each new member used and who created it, and ranks inviters
 on a leaderboard.

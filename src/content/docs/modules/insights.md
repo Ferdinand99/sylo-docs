@@ -1,7 +1,9 @@
 ---
 title: Server insights
+description: Daily activity charts — messages, joins/leaves, top channels.
 ---
 
+<!-- Generated from Sylo's docs/modules/insights.md by scripts/ — edit it there and re-run `npm run import`. -->
 
 Charts of server activity over time — messages, joins, leaves and voice-channel
 usage — per hour or per day, plus the busiest text and voice channels.

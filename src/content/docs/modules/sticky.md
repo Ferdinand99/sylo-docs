@@ -1,7 +1,9 @@
 ---
 title: Sticky messages
+description: Keep a message pinned to the bottom of a channel.
 ---
 
+<!-- Generated from Sylo's docs/modules/sticky.md by scripts/ — edit it there and re-run `npm run import`. -->
 
 Keeps a message glued to the bottom of a channel: when someone else posts, Sylo
 deletes its old copy and re-posts the sticky.

@@ -1,7 +1,9 @@
 ---
 title: Temporary voice channels
+description: Join-to-create voice hubs controlled with /voice-*.
 ---
 
+<!-- Generated from Sylo's docs/modules/temp-voice.md by scripts/ — edit it there and re-run `npm run import`. -->
 
 Join-to-create voice hubs: a member joins a **hub** channel and Sylo spawns a
 personal voice channel (and optional text channel) they own and control with

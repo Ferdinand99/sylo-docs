@@ -1,7 +1,9 @@
 ---
 title: Polls
+description: Reaction polls that auto-close on a timer or vote cap.
 ---
 
+<!-- Generated from Sylo's docs/modules/polls.md by scripts/ — edit it there and re-run `npm run import`. -->
 
 Members create reaction polls with `/poll`. Polls close automatically on a timer
 or a vote cap, and Sylo posts the results.

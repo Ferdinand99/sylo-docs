@@ -1,7 +1,9 @@
 ---
 title: Welcome & leave
+description: Greet joiners (with an optional image) and announce leavers.
 ---
 
+<!-- Generated from Sylo's docs/modules/welcome.md by scripts/ — edit it there and re-run `npm run import`. -->
 
 Greet new members in a channel and/or by DM, announce departures, and optionally
 attach a generated **welcome image**.
