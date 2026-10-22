@@ -93,6 +93,9 @@ export default defineConfig({
     starlight({
       title: 'Sylo docs',
       logo: { src: './src/assets/sylo-icon.webp', replacesTitle: false },
+      // The Sylo starling (assets/brand in the Sylo repo): SVG favicon, PNG for older browsers.
+      favicon: '/favicon.svg',
+      head: [{ tag: 'link', attrs: { rel: 'icon', type: 'image/png', sizes: '96x96', href: '/favicon.png' } }],
       // The look of sylobot.com: self-hosted Inter (variable, with optical
       // sizes) plus Sylo's palette mapped onto Starlight's --sl-* variables.
       customCss: ['@fontsource-variable/inter/opsz.css', './src/styles/sylo.css'],
