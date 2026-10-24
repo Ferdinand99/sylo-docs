@@ -95,7 +95,19 @@ export default defineConfig({
       logo: { src: './src/assets/sylo-icon.webp', replacesTitle: false },
       // The Sylo starling (assets/brand in the Sylo repo): SVG favicon, PNG for older browsers.
       favicon: '/favicon.svg',
-      head: [{ tag: 'link', attrs: { rel: 'icon', type: 'image/png', sizes: '96x96', href: '/favicon.png' } }],
+      head: [
+        { tag: 'link', attrs: { rel: 'icon', type: 'image/png', sizes: '96x96', href: '/favicon.png' } },
+        // Visit counts without cookies (Keen Kestrel, project "docs.sylobot.com");
+        // see section 3a of the Sylo privacy policy.
+        {
+          tag: 'script',
+          attrs: {
+            defer: true,
+            src: 'https://kestrel.hedgerow.tools/js/k.js',
+            'data-key': '17d1c42decbe03a96edf3c5e6793616b',
+          },
+        },
+      ],
       // The look of sylobot.com: self-hosted Inter (variable, with optical
       // sizes) plus Sylo's palette mapped onto Starlight's --sl-* variables.
       customCss: ['@fontsource-variable/inter/opsz.css', './src/styles/sylo.css'],
