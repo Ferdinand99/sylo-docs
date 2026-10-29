@@ -8,7 +8,7 @@ description: Send member/message/role/channel events to log channels.
 Sends server events to a log channel as embeds. Each event type is toggled
 individually.
 
-**Dashboard:** `/guilds/<id>/m/logging` (also the **Audit logging** tab on the
+**Dashboard:** `/v2/guilds/<id>/m/logging` (also the **Audit logging** tab on the
 Moderator page).
 
 ## Needs

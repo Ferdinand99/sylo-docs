@@ -73,12 +73,17 @@ At least one platform must be configured.
 | `FLUXER_OWNER_IDS`        | —                               | Your Fluxer user id(s); the Fluxer counterpart of `OWNER_IDS` |
 | `WEB_PORT`                | `3000`                          | Dashboard HTTP port |
 | `DISCORD_CLIENT_SECRET`   | —                               | Set to require "Log in with Discord" on the dashboard |
-| `SESSION_SECRET`          | random                          | Signs the session cookie; pin it so logins survive restarts |
+| `SESSION_SECRET`          | generated, kept in `<data>/session-secret` | Signs the session cookie and the verify/appeal links. Optional: Sylo makes one and keeps it next to the database, so logins survive restarts. Set it only to use your own value; when set, it wins over the file |
+| `CSP_REPORT_ONLY`         | `0`                             | `1` reports the dashboard's Content-Security-Policy instead of enforcing it. A way back if a custom setup trips the policy; see [Upgrading to 5.0](#upgrading-to-50) |
 | `OWNER_IDS`               | —                               | Your Discord user id(s), comma/space-separated. Gates `/health` to just these accounts when `DISCORD_CLIENT_SECRET` is set — everyone else is blocked, not just non-admins |
 | `DEV_LOG_CHANNEL_ID`      | —                               | A channel id Sylo posts its own errors to — a "dev-log", separate from any per-guild logging/modlog channel. Optional: errors and warnings are stored either way, and the [Sylo app](/app/ios/#health-and-the-dev-log-operators) shows them and can notify operators |
 | `DASHBOARD_URL`           | derived                         | Public dashboard URL; needed behind a reverse proxy and for verification-captcha / ban-appeal links |
 | `TURNSTILE_SITE_KEY`      | —                               | Cloudflare Turnstile site key — enables the Verification captcha mode |
 | `TURNSTILE_SECRET_KEY`    | —                               | Cloudflare Turnstile secret key (pair with the site key) |
+| `DASHBOARD_ERROR_DSN`     | —                               | Optional: send the dashboard's browser errors to your own Sentry or [Keen Kestrel](https://github.com/Ferdinand99/Keen-Kestrel), with this DSN. Unset (default): nothing is sent anywhere. If you set it, your privacy policy should say so |
+| `DASHBOARD_VISIT_STATS`   | `false`                         | With a Keen Kestrel `DASHBOARD_ERROR_DSN`: also count dashboard page views with its `k.js` (no cookies, no stored IP addresses) |
+| `BOT_ERROR_DSN`           | —                               | Optional: send the bot's errors (everything it logs as an error) to your own Sentry or Keen Kestrel. Unset (default): nothing is sent |
+| `ERROR_ENVIRONMENT`       | `production`                    | The environment name on the bot's and the dashboard's error reports |
 | `ITAD_API_KEY`            | —                               | IsThereAnyDeal key — adds non-Epic stores to the Free games module |
 | `INTENT_GUILD_MEMBERS`    | `true`                          | Request the Server Members privileged intent |
 | `INTENT_MESSAGE_CONTENT`  | `true`                          | Request the Message Content privileged intent |
@@ -149,18 +154,27 @@ To require a login:
 2. Same page → **Redirects** → add `<DASHBOARD_URL>/auth/discord/callback`
    (e.g. `http://192.168.1.10:3000/auth/discord/callback`, or the public HTTPS
    URL behind a proxy).
-3. Set a long random `SESSION_SECRET`.
+3. Nothing to do for `SESSION_SECRET`: Sylo generates one and keeps it in
+   `<data>/session-secret` (back it up with the data folder). Set `SESSION_SECRET`
+   yourself only if you want to choose the value.
 4. Set `OWNER_IDS` to your own Discord user id — without it, `/health` (status,
    error log, database backup/restore) is reachable by no one, not even you.
 
 With `DISCORD_CLIENT_SECRET` set, every page except the `/health` JSON and the
 `/metrics` scrape endpoint requires "Log in with Discord". Per-server pages
 require **Manage Server** (or Administrator / owner) in that server, or one of the
-**bot-master roles** set on that server's *Settings* page.
+**bot-master roles** set on that server's *Settings* page. Only the owner or
+someone with Manage Server can change the bot-master roles; a bot master can save
+the rest of that page.
 
 `/health` (JSON) and `/metrics` stay unauthenticated so a monitor or Prometheus
 can reach them — keep them on your LAN, or restrict them at the reverse proxy if
 the dashboard is public.
+
+For an uptime monitor, check `$.status` is `ok` and `$.errorsLastHour` is `0` in the
+`/health` JSON. `errorCount` counts every error since the last restart, so one old
+error would keep such a monitor down. App Store Connect server errors on Apple's side
+are retried once and logged as warnings, not errors.
 
 Point Prometheus at `<host>:<WEB_PORT>/metrics` and import
 `docs/grafana-dashboard.json` for a ready-made overview (gateway health, guild
@@ -355,6 +369,7 @@ docker compose up -d
 ```bash
 git pull
 npm install
+npm run build:v2   # the dashboard (web-v2/dist); without it /v2 shows only a short note
 # restart the process / container
 ```
 
@@ -366,6 +381,50 @@ checkout` the previous tag, then restore the matching `sylo-premigrate-*` (or a
 dated) snapshot from `data/backups/` over `data/sylo.db`. A newer database can't
 be opened by an older build — the schema check refuses it — so always roll the
 database back together with the code.
+
+### Upgrading to 5.0
+
+Sylo 5.0 removes the classic dashboard. There are no database steps: just upgrade as
+described above.
+
+- **The classic dashboard is gone.** The React dashboard (V2) is the only one. The `/?classic=1`
+  switch, the "Back to classic dashboard" link and the old server-rendered pages no longer exist.
+  The public pages (login, verify, appeal, leaderboard, quotes) look like the dashboard now.
+- **Old bookmarks and Discord links still work.** Old addresses such as `/guilds/<id>/…`,
+  `/account`, `/settings`, `/stats` and `/commands` redirect to the matching page in the dashboard.
+- **From source, run `npm run build:v2`** after `npm install`. The Docker image already contains the
+  build. Without it `/v2` shows only a short plain-text note.
+- **The session secret now lives in a file.** If `SESSION_SECRET` is not set, Sylo creates
+  `<data>/session-secret` on first start (next to the database, for example `data/session-secret`)
+  and keeps using it, so logins survive restarts. Back it up with the data folder; if it is lost,
+  everyone just has to log in again. A `SESSION_SECRET` in the environment still wins over the file.
+- **A strict Content-Security-Policy and HSTS are on.** The dashboard now sends an enforcing
+  `Content-Security-Policy` (scripts, styles and connections from Sylo itself, plus the error-reporting
+  host and Cloudflare Turnstile where you configured them), and `Strict-Transport-Security` when
+  `DASHBOARD_URL` is https. Normally you notice nothing. If a custom setup breaks (for example a proxy
+  that injects its own scripts into the page), set
+  `CSP_REPORT_ONLY=1` and restart: the browser then only logs violations to its console instead of
+  blocking them. Use it to find what is being blocked, not as a permanent setting; the policy is
+  there to protect the logged-in admin session.
+- **YouTube alerts use push when Sylo has a public address.** With `DASHBOARD_URL` set to a public
+  `https` address (not an IP address, `localhost` or a LAN name), Sylo subscribes to YouTube's WebSub
+  hub and announces new videos within seconds. YouTube must be able to reach
+  `<DASHBOARD_URL>/webhooks/youtube/<channel id>`, so the reverse proxy has to forward it and keep the
+  `Host` header. Otherwise Sylo polls every few minutes, as before. Nothing to configure either way.
+- **No database steps.** Migrations run on start as always, with the usual pre-migration snapshot.
+
+### Upgrading to 4.10
+
+- **The new dashboard is the default** for everyone, open mode included. `/` opens `/v2`, and old
+  dashboard addresses (`/guilds/<id>/…`, `/account`, `/settings`, `/health` in a browser, `/stats`,
+  `/commands`) open the matching page there. Bookmarks and links Sylo posted in Discord keep working.
+- **The classic dashboard is retiring.** Opening `/?classic=1` (the home page, not another address)
+  keeps a browser on it until `/v2` is opened again; with a login the choice is kept in the session
+  cookie, without one in a small cookie of its own. It is removed in Sylo 5.0.
+- **The command list and the roadmap are public** at `/v2/commands` and `/v2/roadmap`; voting and
+  suggesting still need a login.
+- **Monitoring is unchanged:** `GET /health` still answers JSON to monitors and the container health check.
+- **From source:** run `npm run build:v2` after `npm install`; the Docker image already contains the build.
 
 ---
 

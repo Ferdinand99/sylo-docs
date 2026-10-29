@@ -11,7 +11,7 @@ Two features in one module:
 - **Reaction roles** — a posted message members use to self-assign roles, via
   buttons or a select menu (Sylo uses interactions, not raw reactions).
 
-**Dashboard:** `/guilds/<id>/m/roles`.
+**Dashboard:** `/v2/guilds/<id>/m/roles`.
 
 ## Needs
 
@@ -28,6 +28,8 @@ Two features in one module:
 
 ## Notes
 
-- Editing a reaction-role message re-posts or edits it in place.
+- Editing a reaction-role message re-posts or edits it in place. A set with a
+  role you could not hand out yourself is refused before anything is posted or
+  edited.
 - Managed roles (bot roles, Nitro booster, etc.) can't be assigned and are
   dropped from the picker.

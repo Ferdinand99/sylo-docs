@@ -6,7 +6,7 @@ description: Every Sylo module at a glance — what it does, whether it is on by
 <!-- Generated from Sylo's docs/modules/README.md by scripts/ — edit it there and re-run `npm run import`. -->
 
 Every Sylo feature is a **module** — toggled and configured per server from the
-dashboard (`/guilds/<id>/m/<module>`), like MEE6 or Dyno plugins. Modules are
+dashboard (`/v2/guilds/<id>/m/<module>`), like MEE6 or Dyno plugins. Modules are
 **off by default** unless noted; enable them on the module's page.
 
 Each page below lists what the module does, the Discord permissions and gateway
@@ -35,11 +35,16 @@ platform gaps (native AutoMod rules, threads, moving members between voice).
 | [Starboard](/modules/starboard/) | Re-post well-reacted messages into a highlights channel | off | Message Content |
 | [Autoresponder](/modules/autoresponder/) | Auto-reply when a message matches a trigger | off | Message Content |
 | [Auto-react](/modules/auto-react/) | Auto-react to messages from chosen users/roles, optionally change a role too | off | — |
+| [Auto threads](/modules/auto-threads/) | Open a thread for every new post in chosen channels, named from a template (beta, Discord only) | off | Message Content |
 | [Custom commands](/modules/custom-commands/) | Build `/slash` commands from an action list | off | — |
 | [Reminders](/modules/reminders/) | Post a message to a channel once or on a schedule | off | — |
 | [Sticky messages](/modules/sticky/) | Keep a message pinned to the bottom of a channel | off | — |
 | [Polls](/modules/polls/) | Reaction polls that auto-close on a timer or vote cap | off | — |
 | [Giveaways](/modules/giveaways/) | Prize giveaways with an Enter button; auto-drawn winners | off | — |
+| [Events](/modules/events/) | Events with Join / Maybe / Leave sign-ups, a participant role and reminders (beta) | off | — |
+| [Temporary roles](/modules/temp-roles/) | Give a role for a set time with `/temprole`; Sylo takes it back and logs it (beta) | off | — |
+| [Suggestions](/modules/suggestions/) | Member suggestions with 👍 / 👎 voting, staff decisions and a log channel (beta) | off | — |
+| [Quote board](/modules/quote-board/) | Save memorable messages (message menu or `/quote save`), show them with `/quote`, optional public page (beta) | off | — |
 | [AFK](/modules/afk/) | Members mark themselves away; Sylo replies to mentions | off | — |
 | [Temporary voice channels](/modules/temp-voice/) | Join-to-create voice hubs controlled with `/voice-*` | off | — |
 | [Server statistics](/modules/server-stats/) | Voice channels named with live member/role/boost counts | off | Server Members |

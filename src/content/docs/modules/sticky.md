@@ -8,7 +8,7 @@ description: Keep a message pinned to the bottom of a channel.
 Keeps a message glued to the bottom of a channel: when someone else posts, Sylo
 deletes its old copy and re-posts the sticky.
 
-**Dashboard:** `/guilds/<id>/m/sticky`.
+**Dashboard:** `/v2/guilds/<id>/m/sticky`.
 
 ## Needs
 
@@ -19,9 +19,7 @@ deletes its old copy and re-posts the sticky.
 ## Settings
 
 - **Stickies** — a list of `{ channel, content, embed }`. One sticky per
-  channel; each needs text, an embed, or both. The embed editor is on the V2
-  dashboard only — V1 can still edit a sticky's text/cooldown/channel without
-  disturbing an embed set on V2.
+  channel; each needs text, an embed, or both.
 - **Other apps / webhooks** — by default only human messages bump the sticky.
   Set this to *Bump the sticky too* so messages from other bots, apps or
   webhooks (e.g. a RuneLite plugin posting embeds) — and Sylo's own messages
