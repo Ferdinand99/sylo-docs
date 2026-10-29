@@ -21,6 +21,7 @@ platform gaps (native AutoMod rules, threads, moving members between voice).
 |---|---|---|---|
 | [Moderation](/modules/moderation/) | Warnings, warning auto-actions, mod-log, ban/lock tools | **on** | — |
 | [Auto-moderation](/modules/automod/) | Filter invites, links, spam, caps, banned words | off | Message Content |
+| [Honeypot](/modules/honeypot/) | Trap channels and messages that kick, time out or ban whoever posts or reacts there (beta) | off | — |
 | [Server logging](/modules/logging/) | Send member/message/role/channel events to log channels | off | Server Members + Message Content |
 | [Verification](/modules/verification/) | Gate new members behind a button or captcha | off | Server Members |
 | [Ban appeals](/modules/appeals/) | DM banned members an appeal form; staff decide from the dashboard | off | — |

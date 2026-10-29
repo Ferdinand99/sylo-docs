@@ -5,7 +5,7 @@ import starlight from '@astrojs/starlight';
 // Module id -> display name (Sylo's src/modules/registry.js), grouped and
 // ordered like the dashboard's Overview page (src/web/lib/overviewSummary.js
 // LAYOUT) so this sidebar doesn't drift from how the dashboard organises
-// modules. All 40 registry modules except honeypot (see below). A third entry
+// modules. Every registry module. A third entry
 // marks a module the registry flags `beta: true`.
 const moduleGroups = [
   {
@@ -16,9 +16,7 @@ const moduleGroups = [
     label: 'Moderation & filtering',
     modules: [
       ['automod', 'Auto-moderation'],
-      // 'honeypot' (beta) is missing here: docs/modules/honeypot.md doesn't
-      // exist in the Sylo repo yet, so there's nothing to import. Add it once
-      // the doc exists (scripts/import-modules.mjs picks it up by itself).
+      ['honeypot', 'Honeypot', { beta: true }],
       ['verification', 'Verification'],
       ['appeals', 'Ban appeals'],
       ['logging', 'Server logging'],
