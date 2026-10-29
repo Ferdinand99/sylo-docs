@@ -7,7 +7,7 @@ description: "Sylo – Server Manager for iPhone: what a self-hosted instance ne
 
 A native iOS app (SwiftUI, source in `apps/sylo-ios`) that signs in to a Sylo
 instance, the hosted one or your own, and manages your servers through the same
-JSON API the new dashboard uses. This page covers what a self-hosted instance
+JSON API the dashboard uses. This page covers what a self-hosted instance
 needs for the app to work, and how the app's sign-in works for anyone reading or
 reviewing it.
 
@@ -139,6 +139,7 @@ authorization-code flow with PKCE (RFC 7636, S256 only).
 | `POST /api/mobile/token` | Code + verifier | `{ token, expiresAt, account }`, or `400 invalid_grant` |
 | `DELETE /api/mobile/token` | Bearer token | `204`, or `401` without a valid token |
 | `/api/v2/*` | Bearer token | The dashboard's JSON API |
+| `GET /api/v2/changelog?limit=N` | Bearer token or session | `{ version, releases: [{ version, date, url, sections: [{ title, kind, items: [{ scope, text, refs }] }] }] }`, newest first; the same release notes as the dashboard's What's new page |
 
 `GET /api/mobile/info` is public. The app calls it when you type a server
 address, to tell whether the address is a Sylo server and whether it can sign
@@ -152,7 +153,7 @@ in there:
 | `login` | Whether sign-in is available (false in open mode) |
 | `loginProviders` | The configured logins, for example `["discord", "fluxer"]`; empty when `login` is false |
 | `platforms` | The platforms the bot runs on, for example `["discord"]` |
-| `features` | What this version's app API supports, for example `["app-login", "live-access"]`, so the app can hide what an older Sylo lacks |
+| `features` | What this version's app API supports, for example `["app-login", "live-access", "changelog"]`, so the app can hide what an older Sylo lacks; `changelog` means `GET /api/v2/changelog` is there |
 
 An older Sylo without this endpoint answers `404`, and the app says the server
 is too old for it.
@@ -168,6 +169,9 @@ redirect or an HTML page:
 
 The usual per-IP rate limits apply. On top of them, per minute: 60 calls to
 `/api/mobile/info`, 30 to the `/auth/mobile` pages and 20 code exchanges.
+Actions that post to the platform (test messages, publishing a message or role
+menu, locking or unlocking every channel) share a limit of 10 per minute per
+server and account, answered with `429` and an `{ "error" }`.
 
 ---
 
@@ -181,8 +185,8 @@ The usual per-IP rate limits apply. On top of them, per minute: 60 calls to
 - **Only a SHA-256 hash is stored**, with the account it belongs to, the device
   name, when it was created and last used, and its expiry. A copy of the
   database cannot be used to act as anyone.
-- **Signed-in devices.** The account page (`/account` in the classic dashboard,
-  **Account** in the new dashboard) lists each device with its name and last
+- **Signed-in devices.** The account page (**Account** in the dashboard,
+  `/v2/account`) lists each device with its name and last
   use, and a **Revoke** button.
 - A token stops working, at once, when:
   - the app signs out (`DELETE /api/mobile/token`),

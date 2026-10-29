@@ -5,7 +5,7 @@ import starlight from '@astrojs/starlight';
 // Module id -> display name (Sylo's src/modules/registry.js), grouped and
 // ordered like the dashboard's Overview page (src/web/lib/overviewSummary.js
 // LAYOUT) so this sidebar doesn't drift from how the dashboard organises
-// modules. All 35 registry modules except honeypot (see below). A third entry
+// modules. All 40 registry modules except honeypot (see below). A third entry
 // marks a module the registry flags `beta: true`.
 const moduleGroups = [
   {
@@ -30,9 +30,11 @@ const moduleGroups = [
       ['welcome', 'Welcome & leave'],
       ['welcome-channel', 'Welcome channel'],
       ['roles', 'Reaction roles & autoroles'],
+      ['temp-roles', 'Temporary roles', { beta: true }],
       ['counting', 'Counting'],
       ['leveling', 'Leveling'],
       ['starboard', 'Starboard'],
+      ['quote-board', 'Quote board', { beta: true }],
       ['sticky', 'Sticky messages'],
       ['birthdays', 'Birthdays'],
     ],
@@ -46,8 +48,11 @@ const moduleGroups = [
       ['invite-tracker', 'Invite tracker'],
       ['polls', 'Polls'],
       ['giveaways', 'Giveaways'],
+      ['events', 'Events', { beta: true }],
+      ['suggestions', 'Suggestions', { beta: true }],
       ['autoresponder', 'Autoresponder'],
       ['auto-react', 'Auto-react'],
+      ['auto-threads', 'Auto threads', { beta: true }],
       ['afk', 'AFK'],
       ['server-stats', 'Server statistics'],
       ['insights', 'Server insights'],
@@ -165,6 +170,8 @@ export default defineConfig({
           label: 'Self-hosting',
           items: [
             { label: 'On Discord', slug: 'self-hosting/discord' },
+            // A section of the Discord guide (imported from Sylo's docs/self-hosting.md).
+            { label: 'Upgrading to 5.0', link: '/self-hosting/discord/#upgrading-to-50' },
             { label: 'On Fluxer', slug: 'self-hosting/fluxer' },
             { label: 'Postgres', slug: 'self-hosting/postgres' },
           ],
@@ -173,7 +180,7 @@ export default defineConfig({
           label: 'Apps & dashboard',
           items: [
             { label: 'Sylo app (iOS)', slug: 'app/ios', badge: beta },
-            { label: 'Dashboard V2', slug: 'dashboard/v2', badge: beta },
+            { label: 'Dashboard V2', slug: 'dashboard/v2' },
           ],
         },
         { label: 'Modules', items: modulesSidebar },

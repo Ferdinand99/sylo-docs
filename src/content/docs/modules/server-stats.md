@@ -8,7 +8,7 @@ description: Voice channels named with live member/role/boost counts.
 Keeps voice-channel names updated with live counts — total members, humans, bots,
 a role's member count, or the boost count. MEE6-style "stat channels".
 
-**Dashboard:** `/guilds/<id>/m/server-stats`.
+**Dashboard:** `/v2/guilds/<id>/m/server-stats`.
 
 ## Needs
 
