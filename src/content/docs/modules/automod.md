@@ -70,4 +70,5 @@ have no native form and always run in Sylo's own scanner.
 
 - Immunity roles are configured on the Moderator page's **Admin** tab and are
   shared with the warning auto-actions. They are passed through as the native
-  rules' exempt roles too.
+  rules' exempt roles too. The Auto-moderation page shows the same **Immunity
+  roles** field, and it is saved together with the rest of the form.

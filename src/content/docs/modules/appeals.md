@@ -20,7 +20,9 @@ dashboard.
 
 ## Settings
 
-- **Questions** — 1–5 prompts shown on the appeal form.
+- **Questions** — 1–5 prompts shown on the appeal form, each one a single line.
+  In the dashboard you can move a question up or down and remove it, and the
+  boxes grow to show a long question in full.
 - **Auto-unban on accept** — lift the ban automatically when an appeal is
   accepted (otherwise staff unban manually).
 
@@ -31,3 +33,12 @@ banned" notice). The member fills in the form once. On the **Ban appeals** page,
 staff **Accept** or **Deny** with a reason; the member is DM'd the decision (and,
 on accept, a rejoin invite) — or sees it on the appeal link if there's no shared
 server.
+
+### Changing the questions while someone has the form open
+
+The form remembers which questions it showed. If staff reorder, edit or remove
+questions while a member is still writing, the member gets the form back with the
+current questions and the note "The questions changed while you were writing —
+please check your answers." Nothing is stored at that point. Answers stay only
+under questions whose text is unchanged; a new or edited question comes back
+empty, so an answer never ends up under the wrong question.

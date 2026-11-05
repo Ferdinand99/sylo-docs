@@ -42,7 +42,7 @@ platform gaps (native AutoMod rules, threads, moving members between voice).
 | [Sticky messages](/modules/sticky/) | Keep a message pinned to the bottom of a channel | off | — |
 | [Polls](/modules/polls/) | Reaction polls that auto-close on a timer or vote cap | off | — |
 | [Giveaways](/modules/giveaways/) | Prize giveaways with an Enter button; auto-drawn winners | off | — |
-| [Events](/modules/events/) | Events with Join / Maybe / Leave sign-ups, a participant role and reminders (beta) | off | — |
+| [Events](/modules/events/) | Events with Join / Maybe / Leave sign-ups, a participant role, reminders and optional event pages, public or for signed-in members (beta) | off | — |
 | [Temporary roles](/modules/temp-roles/) | Give a role for a set time with `/temprole`; Sylo takes it back and logs it (beta) | off | — |
 | [Suggestions](/modules/suggestions/) | Member suggestions with 👍 / 👎 voting, staff decisions and a log channel (beta) | off | — |
 | [Quote board](/modules/quote-board/) | Save memorable messages (message menu or `/quote save`), show them with `/quote`, optional public page (beta) | off | — |

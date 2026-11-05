@@ -8,7 +8,9 @@ description: Member suggestions with 👍 / 👎 voting, staff decisions and a l
 Members post ideas, everyone votes with **👍** and **👎**, and staff approve, deny,
 or mark them as implemented or "considering" with an optional reason. Every
 suggestion gets the server's own number (#1, #2, ...) and its own discussion
-thread (Discord only).
+thread (Discord only). A number is **never used again**: the server keeps a counter
+that only goes up, so deleting the newest suggestion does not hand its number to the
+next one.
 
 **Dashboard:** `/v2/guilds/<id>/m/suggestions` - settings, a list you can filter by
 status and sort by newest or most votes, and the staff actions.
@@ -49,7 +51,7 @@ status and sort by newest or most votes, and the staff actions.
 
 | Command | |
 |---|---|
-| `/suggest` | Anyone. `text` (up to 1000 characters) and an optional `title` (up to 100). |
+| `/suggest` | Anyone. `text` (up to 1000 characters) and an optional `title` (up to 100). On Fluxer: `!suggest Add a pixel-art channel`, or with a title `!suggest Add a pixel-art channel title:Pixel art`. |
 | `/suggestion approve` | Staff. `id` and an optional `reason` (up to 500 characters). |
 | `/suggestion deny` | Staff. Same options. |
 | `/suggestion implement` | Staff. Same options. |

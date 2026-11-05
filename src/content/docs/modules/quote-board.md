@@ -16,8 +16,14 @@ saved quote with a search and a Remove button on each row.
 
 ## Needs
 
-- No special permission or privileged intent. Sylo has to be able to **read the
-  channel** of a message to save it (View Channel and Read Message History).
+- No special permission. Sylo has to be able to **read the channel** of a message to
+  save it (View Channel and Read Message History).
+- The **Message Content** intent (`INTENT_MESSAGE_CONTENT`, on by default; see
+  [privileged intents](/self-hosting/discord/#privileged-intents)) is needed only for
+  `/quote save <message link>` on Discord: without it Discord sends Sylo a fetched
+  message with its text empty, and Sylo answers that there is nothing to save and
+  points to the menu. The **Save quote** menu does not need it, because Discord sends
+  the chosen message in full. The module is therefore not marked as needing the intent.
 - **Discord:** the "Save quote" entry appears under *Apps* in the right-click menu
   of a message once Sylo has registered its commands (a few minutes after an update;
   Discord can take up to an hour for new global commands).
@@ -66,7 +72,8 @@ saved under.
 ### Quotes from private channels stay in their channel
 
 When a quote is saved, Sylo notes whether **@everyone could read** the channel it came
-from (and that it is not age-restricted). A quote from a **public source** may be shown
+from (and that it is not age-restricted; on Fluxer that includes the channel's category and the
+server, see [On Fluxer](#on-fluxer)). A quote from a **public source** may be shown
 in any channel. A quote from a **private source** (a staff or mod channel, a hidden
 channel) is only ever shown **in the channel it was saved from**:
 
@@ -79,6 +86,12 @@ channel) is only ever shown **in the channel it was saved from**:
 - Saving a private message with `/quote save <link>` from another channel answers only
   the person who saved it, not the channel.
 - In the source channel itself, all of this works normally and in public.
+
+**Threads** follow their parent channel: a thread of a public channel is a public
+source, a thread of an age-restricted channel is not, and a **private thread** is
+never public (it is only ever shown in that thread). To save a message from a private
+thread with `/quote save <link>`, you have to be a member of the thread (or have
+Manage Threads in its channel).
 
 The dashboard is not limited: staff with Manage Server see and can remove every quote,
 and it marks the private ones "not on the public page". On Fluxer a "private" reply is
@@ -121,7 +134,15 @@ What it shows and what it never shows:
   styles).
 
 Switch the setting off and the address answers "not found" again at once. There is
-no vanity address for this page.
+no vanity address for this page. A server Sylo is not in, a server without the module,
+and a page that is switched off all get the **same** plain "not found" answer, so the
+page does not reveal which servers Sylo is in.
+
+**Public or not is decided once, when the quote is saved.** A quote saved from a
+channel that was public then stays on the public page if the channel is made private
+later (and a quote saved from a private channel stays off it if the channel is opened
+up). To take a quote off the page, remove it on the dashboard or with `/quote remove`.
+Check the channel's permissions before you switch the public page on.
 
 ## Limits
 
@@ -157,7 +178,20 @@ The other commands work the same way: `!quote random`, `!quote search <text>`,
 `!quote user @member`, `!quote show <number>`, `!quote remove <number>`. Replies that
 should be private are deleted after about 15 seconds. Quotes show a link that opens
 the Fluxer web app. The dashboard and the public page work exactly as on Discord.
-Not verified against a live Fluxer server.
+Whether a channel is a **public source** is worked out from the @everyone role's
+permissions and the channel's overwrites, the same way as on Discord (tested against
+the real Fluxer SDK classes, not yet against a live Fluxer server). Before Sylo could
+do this on Fluxer, every quote saved there was noted as coming from a private source
+(shown only in its own channel and kept off the public page). Those older quotes keep
+that note, because it is decided when a quote is saved; only quotes saved from now on
+are marked public where their channel is.
+
+On Fluxer a channel can be age-restricted by its own setting, by its category or by the
+server (its own setting beats its category's, which beats the server's). Sylo applies the
+same rule, so a quote from a channel that Fluxer treats as age-restricted is never marked
+public, even when the channel itself is not marked. It fails closed: a category Sylo does
+not know, a flag it cannot read or a missing server flag count as age-restricted. To bring an old quote to the public page,
+remove it and save it again.
 
 ## Gaps
 
