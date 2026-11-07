@@ -7,13 +7,21 @@ description: "Sylo – Server Manager for iPhone: what a self-hosted instance ne
 
 A native iOS app (SwiftUI, source in `apps/sylo-ios`) that signs in to a Sylo
 instance, the hosted one or your own, and manages your servers through the same
-JSON API the new dashboard uses. This page covers what a self-hosted instance
+JSON API the dashboard uses. This page covers what a self-hosted instance
 needs for the app to work, and how the app's sign-in works for anyone reading or
 reviewing it.
 
 > **In TestFlight.** The app ("Sylo – Server Manager") is in public beta and not
 > on the App Store yet. [Join the beta](https://testflight.apple.com/join/6FXxPjxu). The server side described here is part of Sylo; it does nothing
 > until an app signs in.
+
+**Version 1.1** (TestFlight, [public link](https://testflight.apple.com/join/6FXxPjxu))
+adds settings screens for Events, Suggestions, Temporary roles, Auto threads and
+the Quote board. On a Fluxer server the server's settings also have a **Command
+prefix** field (1 to 5 characters, empty for the instance default; see
+[Changing the prefix](/self-hosting/fluxer/#changing-the-prefix)). When the
+instance sets `PIGEON_URL`, the app gets its notifications through Postal Pigeon
+(see [How they reach the phone](#how-they-reach-the-phone)).
 
 ## What a self-hosted instance needs
 
@@ -139,6 +147,7 @@ authorization-code flow with PKCE (RFC 7636, S256 only).
 | `POST /api/mobile/token` | Code + verifier | `{ token, expiresAt, account }`, or `400 invalid_grant` |
 | `DELETE /api/mobile/token` | Bearer token | `204`, or `401` without a valid token |
 | `/api/v2/*` | Bearer token | The dashboard's JSON API |
+| `GET /api/v2/changelog?limit=N` | Bearer token or session | `{ version, releases: [{ version, date, url, sections: [{ title, kind, items: [{ scope, text, refs }] }] }] }`, newest first; the same release notes as the dashboard's What's new page |
 
 `GET /api/mobile/info` is public. The app calls it when you type a server
 address, to tell whether the address is a Sylo server and whether it can sign
@@ -152,7 +161,7 @@ in there:
 | `login` | Whether sign-in is available (false in open mode) |
 | `loginProviders` | The configured logins, for example `["discord", "fluxer"]`; empty when `login` is false |
 | `platforms` | The platforms the bot runs on, for example `["discord"]` |
-| `features` | What this version's app API supports, for example `["app-login", "live-access"]`, so the app can hide what an older Sylo lacks |
+| `features` | What this version's app API supports, for example `["app-login", "live-access", "changelog"]`, so the app can hide what an older Sylo lacks; `changelog` means `GET /api/v2/changelog` is there |
 
 An older Sylo without this endpoint answers `404`, and the app says the server
 is too old for it.
@@ -168,6 +177,9 @@ redirect or an HTML page:
 
 The usual per-IP rate limits apply. On top of them, per minute: 60 calls to
 `/api/mobile/info`, 30 to the `/auth/mobile` pages and 20 code exchanges.
+Actions that post to the platform (test messages, publishing a message or role
+menu, locking or unlocking every channel) share a limit of 10 per minute per
+server and account, answered with `429` and an `{ "error" }`.
 
 ---
 
@@ -181,8 +193,8 @@ The usual per-IP rate limits apply. On top of them, per minute: 60 calls to
 - **Only a SHA-256 hash is stored**, with the account it belongs to, the device
   name, when it was created and last used, and its expiry. A copy of the
   database cannot be used to act as anyone.
-- **Signed-in devices.** The account page (`/account` in the classic dashboard,
-  **Account** in the new dashboard) lists each device with its name and last
+- **Signed-in devices.** The account page (**Account** in the dashboard,
+  `/v2/account`) lists each device with its name and last
   use, and a **Revoke** button.
 - A token stops working, at once, when:
   - the app signs out (`DELETE /api/mobile/token`),
@@ -247,9 +259,50 @@ ticket's notifications, and a tap opens the conversation.
 
 ### How they reach the phone
 
-Apple only accepts notifications for the Sylo app from whoever holds the app's
-push key, so a self-hosted instance cannot send them to Apple itself. It sends
-them through the hosted Sylo instead:
+An instance has three ways to notify a device, and picks one per device by what
+that device's app sign-in holds. A newer app uses Postal Pigeon when this
+instance offers it; an older app build keeps using the relay or the direct way,
+so nobody loses notifications when an instance turns Pigeon on.
+
+- **Postal Pigeon (`PIGEON_URL`):** [Postal Pigeon](https://github.com/Ferdinand99/Postal-Pigeon)
+  is the Hedgerow push relay, `https://pigeon.hedgerow.tools`. `/api/mobile/info`
+  names it (`pigeon`) and lists the feature `push-pigeon`. The **app** registers
+  its device with Pigeon and gives your instance only a handle (`hrh_…`), so your
+  instance never sees the device's push token. A notification then carries **no
+  text**: your instance asks Pigeon to push to the handle, with a random
+  reference and a collapse key (below), and Pigeon and Apple deliver a generic
+  notification. That is all your instance gives Pigeon about a notification. The app's
+  notification extension asks your instance for the text with that reference
+  (`GET /api/mobile/push/events/:ref`), so the server name, the member's name and
+  the message never go through Pigeon or Apple. The app only uses the official
+  Pigeon; an instance that names another gets no notifications from it. Your
+  instance registers itself with Pigeon when it starts, or else the first time it
+  sends (a small proof of work, about a second, then a credential kept in its
+  settings, sealed with a key derived from `SESSION_SECRET`), and only makes
+  outgoing HTTPS requests. While it sends, it logs problems with Pigeon at debug
+  level only, because the dev-log notifications go through Pigeon too.
+  - Pigeon allows a device 6 notifications an hour, 3 at once. Your instance keeps
+    to the same budget; a notification beyond it is dropped (the app lists the
+    tickets when it is opened). Notifications for one ticket replace each other
+    on the phone: the collapse key that does this is an HMAC-SHA256 of the
+    sign-in and the ticket (or the dev log), with a key derived from
+    `SESSION_SECRET` for this purpose alone. Pigeon sees an opaque value that
+    cannot be traced to a server or a ticket without that secret, and that is
+    different for each device.
+  - A device Pigeon has not yet accepted a push for is sent to slowly (one a
+    minute across all such devices, 3 an hour for one), so a made-up handle
+    cannot use up the instance's allowance for unknown handles at Pigeon.
+  - The text is kept for two hours (Apple stops trying after one) under the
+    reference, and is only given to the app sign-in it was made for, only while
+    that account may still see the ticket (operators only, for the dev log).
+    Anything else, a reference that is unknown, expired or someone else's,
+    is a `404`.
+- **Off:** leave `PIGEON_URL` unset or empty. Nothing changes for the other two.
+
+The two older ways, for app builds that do not know Pigeon. Apple only accepts
+notifications for the Sylo app from whoever holds the app's push key, so a
+self-hosted instance cannot send them to Apple itself. It sends them through the
+hosted Sylo instead:
 
 - **Self-hosted (the default):** `/api/mobile/info` names the relay
   (`pushRelay`, from `PUSH_RELAY_URL`, default `https://app.sylobot.com`). When
@@ -261,7 +314,9 @@ them through the hosted Sylo instead:
   notifications. Your instance only makes outgoing HTTPS requests; nothing needs
   to reach it from outside, and a login proxy in front of it needs no new rule.
 - **Off:** set `PUSH_RELAY_URL` to an empty value. `/api/mobile/info` then
-  leaves out `push` and the app says notifications aren't available.
+  leaves out `push` (which is what the older apps look for) and they say
+  notifications aren't available. With `PIGEON_URL` set, apps that know Pigeon
+  still get notifications.
 - **The hosted Sylo** holds the key (`APNS_KEY_ID`, `APNS_TEAM_ID`,
   `APNS_PRIVATE_KEY`, `APNS_TOPIC`) and talks to Apple directly.
 
@@ -274,7 +329,8 @@ without use.
 
 | Method and path | Auth | Answer |
 | --- | --- | --- |
-| `POST /api/mobile/push` | Bearer token | `{ relayToken, environment }` (relay) or `{ deviceToken, environment }` (direct) → `{ ok: true }`; `503` when this instance can't send |
+| `POST /api/mobile/push` | Bearer token | `{ pigeonHandle, environment }` (Pigeon), `{ relayToken, environment }` (relay) or `{ deviceToken, environment }` (direct) → `{ ok: true }`; `400` `invalid_push_token`, or `relay_token_required` / `device_token_required` / `pigeon_handle_required` for the kind this instance does not take; `503` when this instance can't send |
+| `GET /api/mobile/push/events/:ref` | Bearer token | The text of a Pigeon notification: `{ title, subtitle?, body, threadId, kind, data }`, no server address, `Cache-Control: no-store`. `404` for an unknown, expired or someone else's reference, or a ticket the account may no longer see. At most 30 a minute per sign-in |
 | `GET /api/mobile/push` | Bearer token | `{ enabled, mutedServers }`, plus `devLog` for an operator |
 | `PUT /api/mobile/push/dev-log` | Bearer token, operators only | `{ level: "off" \| "errors" \| "warnings" }` → `{ devLog }` |
 | `PUT /api/mobile/push/servers/:guildId` | Bearer token | `{ muted }` → `{ mutedServers }` |

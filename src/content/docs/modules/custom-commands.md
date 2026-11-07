@@ -7,7 +7,7 @@ description: Build /slash commands from an action list.
 
 Build your own `/slash` commands from an ordered list of actions.
 
-**Dashboard:** `/guilds/<id>/m/custom-commands`.
+**Dashboard:** `/v2/guilds/<id>/m/custom-commands`.
 
 ## Needs
 

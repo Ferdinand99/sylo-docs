@@ -59,7 +59,7 @@ export const STANDALONE_PAGES = [
     slug: 'dashboard/v2',
     title: 'Dashboard V2',
     description:
-      'The rebuilt, opt-in dashboard at /v2: trying it, what is different, saving, and what self-hosters need.',
+      'The React dashboard at /v2, the only dashboard since Sylo 5.0: what it shows, saving, and what self-hosters need.',
   },
   {
     src: 'docs/modules/README.md',

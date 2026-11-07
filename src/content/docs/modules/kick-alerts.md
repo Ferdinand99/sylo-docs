@@ -7,7 +7,7 @@ description: Announce when a Kick.com streamer goes live.
 
 Announce in a channel when a [Kick.com](https://kick.com) streamer goes live.
 
-**Dashboard:** `/guilds/<id>/m/kick-alerts`.
+**Dashboard:** `/v2/guilds/<id>/m/kick-alerts`.
 
 ## Needs
 

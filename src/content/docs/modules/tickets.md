@@ -8,7 +8,7 @@ description: Members DM the bot; staff reply from the dashboard.
 Members open a ticket by **DMing the bot**. Staff read the conversation and reply
 from the dashboard — replies are delivered to the member as a DM from Sylo.
 
-**Dashboard:** `/guilds/<id>/tickets` (list) and `/guilds/<id>/tickets/<n>`
+**Dashboard:** `/v2/guilds/<id>/tickets` (list) and `/v2/guilds/<id>/tickets/<n>`
 (conversation).
 
 ## Needs

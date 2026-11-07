@@ -8,7 +8,7 @@ description: Auto-react to messages from chosen users/roles, optionally change a
 Automatically react — and optionally add or remove a role — when a message
 comes from a chosen user or role.
 
-**Dashboard:** `/guilds/<id>/m/auto-react`.
+**Dashboard:** `/v2/guilds/<id>/m/auto-react`.
 
 ## Needs
 

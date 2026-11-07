@@ -8,7 +8,7 @@ description: Members count upward one number at a time.
 A channel where members count upward one number at a time. Sylo tracks the
 current number and the record.
 
-**Dashboard:** `/guilds/<id>/m/counting`.
+**Dashboard:** `/v2/guilds/<id>/m/counting`.
 
 ## Needs
 

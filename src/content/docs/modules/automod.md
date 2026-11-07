@@ -9,7 +9,7 @@ Scans new and edited messages and acts on the first rule that matches.
 Administrators, the server owner, bot-master roles, and members with an
 **immunity role** are always skipped. Sylo never acts on other bots.
 
-**Dashboard:** `/guilds/<id>/moderation` → **Automod** tab.
+**Dashboard:** `/v2/guilds/<id>/moderation` → **Automod** tab.
 
 ## Needs
 
@@ -70,4 +70,5 @@ have no native form and always run in Sylo's own scanner.
 
 - Immunity roles are configured on the Moderator page's **Admin** tab and are
   shared with the warning auto-actions. They are passed through as the native
-  rules' exempt roles too.
+  rules' exempt roles too. The Auto-moderation page shows the same **Immunity
+  roles** field, and it is saved together with the rest of the form.
