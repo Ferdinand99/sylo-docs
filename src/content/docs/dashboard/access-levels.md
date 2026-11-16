@@ -36,8 +36,9 @@ roles change. See [Dashboard authentication](/self-hosting/discord/#dashboard-au
 A person with **View** or **Inbox** access sees a small **View only** or
 **Inbox only** label in the top bar. Forms are read-only and their buttons are
 disabled, with a note saying why. If a request still gets through to the server
-above the person's level, Sylo answers with a "forbidden" error that names both
-levels.
+above the person's level, Sylo refuses it with a "forbidden" error. The message
+names only the person's own level (for example "Your dashboard access in this
+server is View only"); the level the action needed is in the error's details.
 
 - **What the inboxes contain needs Inbox.** With View, the lists of tickets,
   ban appeals, applications and suggestions still show, but without the content:
@@ -46,8 +47,8 @@ levels.
 - **Secrets need Edit.** GitHub webhook secrets and addresses are hidden, RSS
   feed addresses show only their host, and the configuration export and the
   server insights refresh are Edit only.
-- **Import and Duplicate need Edit**, and neither ever carries the dashboard
-  access roles from one server to another.
+- **Import and Duplicate need Edit.** Import never carries the dashboard access
+  roles from one server to another.
 - **Ticket notifications** go to Inbox and Edit members and to ticket staff only.
 
 ## What Sylo refuses to hand out
@@ -55,9 +56,12 @@ levels.
 Sylo 5.2 also closes the ways a person could use the dashboard to give out more
 than they have themselves.
 
-- **Roles above your own.** You cannot make Sylo give a role that sits at or
-  above your highest role, or that gives moderator or administrator rights. This
-  holds everywhere a role is handed out: reaction roles and role panels, welcome
+- **Roles above your own.** Unless you are the server owner or have
+  Administrator, you cannot make Sylo give a role that sits at or above your
+  highest role, and you need Manage Roles to hand out a role with moderator or
+  administrator permissions (Manage Server, Manage Roles, Kick, Ban and the
+  like). Only the owner or someone with Manage Server can hand out an Edit role
+  (a bot-master role). This holds everywhere a role is handed out: reaction roles and role panels, welcome
   and level rewards, the Economy shop, Events, Applications, and when you
   re-publish, move, enable or import something. A role Sylo itself cannot give
   (above its own highest role, or managed by an integration) is marked in the
@@ -75,6 +79,11 @@ than they have themselves.
 
 ## Privacy changes
 
-- `/forget` and account deletion remove everything they should.
 - `/mydata` no longer shows the identities of staff members.
-- Private replies on Fluxer are sent as direct messages.
+- `/forget` and account deletion had gaps in what they removed; those are fixed.
+  What stays is deliberate: moderation cases, an active temporary ban, honeypot
+  catches and a counting penalty. See the privacy policy for the full list.
+- On Fluxer, a private reply that has content in it (for example a member's
+  moderation history, a private quote, the event list or a data export) is sent
+  as a direct message. A short status or error line is still a normal message
+  that Sylo deletes after about 15 seconds.

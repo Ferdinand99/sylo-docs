@@ -418,11 +418,12 @@ database back together with the code.
 
 ### Upgrading to 5.2
 
-Sylo 5.2 needs no manual steps beyond the usual upgrade described above.
+Sylo 5.2 needs no manual steps beyond the usual upgrade described above, unless you
+run Sylo behind a reverse proxy (see `DASHBOARD_URL` below).
 
-- **Database migrations 76 to 80 run on start.** Sylo writes the usual
-  `sylo-premigrate-vN-*.db` backup first. As always, roll the database back
-  together with the code if you go back to an older version.
+- **Database migrations 73 to 80 run on start** (from 5.1). On SQLite Sylo writes
+  the usual `sylo-premigrate-vN-*.db` backup first. As always, roll the database
+  back together with the code if you go back to an older version.
 - **Behind a reverse proxy, set `DASHBOARD_URL`** to your public address. The
   Sylo app now checks that a sign-in or connect callback came from the server it
   signed in to, and Sylo names its own address in that callback.

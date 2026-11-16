@@ -15,8 +15,10 @@ Pick a server and the **Overview** opens with two things.
 - **Needs attention** is a short list of what a person has to do. It shows, in
   this order: work that is waiting (open tickets, ban appeals, applications,
   suggestions), modules that are on but not set up, modules the bot cannot run,
-  and permissions Sylo is missing. Each item has a link to the page where it is
-  fixed. When there is nothing to do, it says "Nothing needs your attention right
+  and permissions Sylo is missing. Most items link to the page where they are
+  fixed. Missing permissions have no link, because they are given to Sylo's role
+  in Discord itself, and the text names them. A module that waits for something
+  only an operator can add has no link either. When there is nothing to do, it says "Nothing needs your attention right
   now."
 - **Module cards**, grouped by category. Every card has one line that says how
   the module is set up (for example `#welcome · Verified role`), and a coloured
@@ -26,8 +28,8 @@ Pick a server and the **Overview** opens with two things.
 
 ## The sidebar
 
-The sidebar is grouped, and only shows what is turned on for the server you are
-looking at.
+The sidebar is grouped. The **Modules** group lists only the modules that are
+switched on for the server you are looking at; the other groups are always there.
 
 | Group | What is in it |
 | --- | --- |
@@ -38,8 +40,8 @@ looking at.
 | **Modules** | The modules that are switched on, in the same categories as the Overview |
 | **More** | The command list, the Roadmap and What's new |
 
-The people who run the instance (the operators) also get a group with the Bot
-personalizer, Health, the Roadmap admin and the stats cache.
+The people who run the instance (the operators) also get a **Bot owner** group
+with the Bot personalizer, Health, the Roadmap admin and the Game stats cache.
 
 ## Health check
 
