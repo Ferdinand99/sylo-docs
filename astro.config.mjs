@@ -43,7 +43,7 @@ const moduleGroups = [
   {
     label: 'Utilities',
     modules: [
-      ['tickets', 'Tickets (modmail)'],
+      ['tickets', 'Tickets'],
       ['reminders', 'Reminders'],
       ['custom-commands', 'Custom commands'],
       ['invite-tracker', 'Invite tracker'],
@@ -171,7 +171,8 @@ export default defineConfig({
           label: 'Self-hosting',
           items: [
             { label: 'On Discord', slug: 'self-hosting/discord' },
-            // A section of the Discord guide (imported from Sylo's docs/self-hosting.md).
+            // Sections of the Discord guide (imported from Sylo's docs/self-hosting.md).
+            { label: 'Upgrading to 5.2', link: '/self-hosting/discord/#upgrading-to-52' },
             { label: 'Upgrading to 5.0', link: '/self-hosting/discord/#upgrading-to-50' },
             { label: 'On Fluxer', slug: 'self-hosting/fluxer' },
             { label: 'Postgres', slug: 'self-hosting/postgres' },
@@ -180,8 +181,10 @@ export default defineConfig({
         {
           label: 'Apps & dashboard',
           items: [
-            { label: 'Sylo app (iOS)', slug: 'app/ios', badge: beta },
+            { label: 'Sylo app (iOS)', slug: 'app/ios' },
             { label: 'Dashboard V2', slug: 'dashboard/v2' },
+            { label: 'Overview and tools', slug: 'dashboard/overview-and-tools' },
+            { label: 'Access levels', slug: 'dashboard/access-levels' },
           ],
         },
         { label: 'Modules', items: modulesSidebar },
@@ -210,8 +213,8 @@ export default defineConfig({
               attrs: { target: '_blank' },
             },
             {
-              label: 'TestFlight beta',
-              link: 'https://testflight.apple.com/join/6FXxPjxu',
+              label: 'Sylo app on the App Store',
+              link: 'https://apps.apple.com/app/sylo-server-manager/id6824036901',
               attrs: { target: '_blank' },
             },
             {

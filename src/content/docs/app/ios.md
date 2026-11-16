@@ -11,17 +11,42 @@ JSON API the dashboard uses. This page covers what a self-hosted instance
 needs for the app to work, and how the app's sign-in works for anyone reading or
 reviewing it.
 
-> **In TestFlight.** The app ("Sylo – Server Manager") is in public beta and not
-> on the App Store yet. [Join the beta](https://testflight.apple.com/join/6FXxPjxu). The server side described here is part of Sylo; it does nothing
+> **On the App Store.** The app ("Sylo – Server Manager") is
+> [on the App Store](https://apps.apple.com/app/sylo-server-manager/id6824036901). The server side described here is part of Sylo; it does nothing
 > until an app signs in.
 
-**Version 1.1** (TestFlight, [public link](https://testflight.apple.com/join/6FXxPjxu))
-adds settings screens for Events, Suggestions, Temporary roles, Auto threads and
-the Quote board. On a Fluxer server the server's settings also have a **Command
-prefix** field (1 to 5 characters, empty for the instance default; see
-[Changing the prefix](/self-hosting/fluxer/#changing-the-prefix)). When the
-instance sets `PIGEON_URL`, the app gets its notifications through Postal Pigeon
-(see [How they reach the phone](#how-they-reach-the-phone)).
+## What the app covers
+
+Everything a server administrator can do in the dashboard, the app can do too,
+and the app has no "manage this in the web dashboard" links. That covers:
+
+- every module's settings, including the ones with lists to manage (reaction
+  roles, custom commands, reminders, events, giveaways, applications and their
+  forms, introductions, the economy with its shop, balances, inventories and
+  activity, and the rest);
+- moderation (cases, bans, warnings, timeouts, channel locks), tickets, appeals,
+  and the audit log;
+- embed messages and the command list per server;
+- the server's general settings, the configuration export, and a member's data
+  (look up, export, erase);
+- Insights, the leaderboard, the roadmap, the changelog, and the account page
+  (connected platforms, signed-in devices, delete account).
+
+The people who run the instance (its operators) get their own screens too, under
+Settings and only for operator accounts: Health with the database backups
+(create, download, import, restore, delete) and the dev-log tests, the Bot
+Personalizer, the stats cache and the roadmap admin. See
+[Health and the dev log (operators)](#health-and-the-dev-log-operators).
+
+What stays on the web is only what is not an administrator's job: the public
+pages (the web shop, the application forms, event and quote pages) that members
+open in a browser. The app can copy or open the address of a public page; it
+never needs the dashboard to finish a task.
+
+The app works against older Sylo servers too: it hides what a server does not
+offer and never sends a field the server did not send.
+
+---
 
 ## What a self-hosted instance needs
 
@@ -99,11 +124,13 @@ authorization-code flow with PKCE (RFC 7636, S256 only).
    login when `platform` is given or only one is configured, else the login
    chooser. Someone already signed in in that browser skips this step.
 4. The login returns to `GET /auth/mobile/confirm`: "Sign in to the Sylo app?",
-   showing the account name and platforms, with **Allow** and **Cancel**.
+   showing the account name and platforms and the address of this server (so a person
+   can notice a server they did not expect), with **Allow** and **Cancel**.
 5. **Allow** posts the form back (with a per-flow nonce). Sylo creates a
-   one-time code and redirects to `sylo://auth?code=…&state=…`. **Cancel** goes
-   to `sylo://auth?error=access_denied&state=…`.
-6. The app checks that `state` is the one it sent, then exchanges the code:
+   one-time code and redirects to `sylo://auth?code=…&state=…&iss=<server>`. **Cancel**
+   goes to `sylo://auth?error=access_denied&state=…&iss=<server>`.
+6. The app checks that `state` is the one it sent and that `iss` is the server it
+   chose (see [the issuer](#the-iss-parameter)), then exchanges the code:
 
    ```http
    POST /api/mobile/token
@@ -134,6 +161,120 @@ authorization-code flow with PKCE (RFC 7636, S256 only).
 8. Signing out in the app calls `DELETE /api/mobile/token` with that header,
    which answers `204` and revokes the token at once.
 
+### The iss parameter
+
+Both app callbacks (`sylo://auth` here, `sylo://connected` under
+[Adding the other login](#adding-the-other-login)) carry `iss`, the address of the
+server that made them, in the style of RFC 9207. It is the origin of this instance's
+public URL (`DASHBOARD_URL`, else the address the browser used): scheme, host and port
+only, with no path and no trailing slash, for example `https://sylo.example.com` or
+`http://192.168.1.20:3000`. It is URL-encoded in the callback and is on error callbacks
+too.
+
+It exists to stop a mix-up attack: a malicious self-hosted Sylo server could send the
+sign-in sheet on to a different Sylo server and then redeem the code that server
+issues. The app must therefore compare `iss` with the origin of the server the person
+chose, and **reject the callback on a mismatch** (do not exchange the code, do not
+finish the link). Compare origins, not strings: the host is case-insensitive and a
+default port may be left out. The confirmation pages also show the server address, so a
+person can notice a server they did not expect.
+
+Two things follow for operators:
+
+- Behind a reverse proxy, set `DASHBOARD_URL` to the public address (the same one people
+  type into the app). Without it, `iss` is built from the request, which behind a proxy
+  that ends TLS can be `http://…` or an internal name, and the app then rejects its own
+  server.
+- Separate Sylo instances need distinct origins. Only the origin is compared, so two
+  instances served from different paths of one host (`https://host/a`, `https://host/b`)
+  are not told apart by `iss`.
+
+Servers older than this change leave `iss` out. An app that still supports them may
+accept a callback without `iss`; one that does not can require it. A callback that has
+`iss` must always match. Apps that ignore unknown parameters keep working with newer
+servers.
+
+---
+
+## Adding the other login
+
+An account holds one Discord and one Fluxer login. On a Sylo that has both set up
+(`app-connect` in the [features](#endpoints)), the app can add the one the account
+lacks, so a Discord account can also sign in with Fluxer, or the other way round.
+Disconnecting needs nothing new: the account page does it.
+
+The login is finished **in the app**, with its token, not by the browser. That is what
+keeps someone else's link from attaching your login to their account.
+
+1. The app asks for a code. It needs its token, and only for a platform the account
+   does not have yet:
+
+   ```http
+   POST /api/mobile/connect/fluxer
+   Authorization: Bearer sylo_…
+   ```
+
+   ```json
+   { "code": "…", "expiresAt": 1799999999999 }
+   ```
+
+   `400 { "error": "invalid_platform" }` for a platform that is unknown or not set
+   up here, `409 { "error": "already_connected" }` when the account has it. The code
+   names the account and the token that asked.
+2. The app opens `GET /auth/mobile/connect?code=…` in the browser sheet, on the same
+   address. The page asks "Add Fluxer to the Sylo account *name*?", says which
+   account that is and shows the address of this server. If the browser is signed in to the dashboard as somebody else, it
+   warns that someone else may have started this.
+3. **Continue** leads to the other platform's login, which is asked to show its consent
+   screen (`prompt=consent`), so the person sees which of their accounts there is used.
+4. The callback links nothing. It keeps the verified login under a **result code** (120
+   seconds, single use, stored as a hash, bound to the account and the token from step 1)
+   and ends the sheet at
+
+   ```
+   sylo://connected?platform=fluxer&result=<code>&iss=<server>
+   ```
+
+   or, when nothing was kept, `sylo://connected?platform=fluxer&error=<word>&iss=<server>` with one of
+   `access-denied` (cancelled), `invalid-response`, `expired` (took more than ten
+   minutes), `provider-error`, `token-revoked` (the app was signed out meanwhile),
+   `identity-linked` (that login already belongs to another account) or `already-linked`
+   (the account already has a login on that platform).
+
+   `iss` is this server's origin, as in [the sign-in](#the-iss-parameter): the app must
+   reject a callback whose `iss` is not the server it chose, before it uses `result`.
+5. The app completes the link with the same token:
+
+   ```http
+   POST /api/mobile/connect/complete
+   Authorization: Bearer sylo_…
+   Content-Type: application/json
+
+   { "result": "<code>" }
+   ```
+
+   ```json
+   { "ok": true, "platform": "fluxer", "platforms": ["discord", "fluxer"] }
+   ```
+
+   The login is linked only when this token is the one that asked for the code in step 1.
+   Anything else is `400 { "error": "invalid_result" }` (unknown, used, expired, or made for
+   another token or account), and the code is used up by the attempt. `409` with
+   `identity_linked` or `already_linked` when the login or the platform was taken in the
+   meantime; `401` when the token is no longer valid.
+
+The browser is not signed in to Sylo at any point: nothing here starts, replaces or
+extends a web session.
+
+**For app developers.** In the case this design exists for (someone else's link opened in
+the person's ordinary browser), the `sylo://connected?…&result=…` redirect goes through
+the operating system's URL-scheme dispatcher, and an app on the device that also claims
+`sylo://` could receive it. The server cannot prevent that, because the one who started
+the flow is the attacker. So the app must act only on the callback that comes back from its
+own `ASWebAuthenticationSession` (the one it opened in step 2), and must ignore a
+`sylo://connected` URL that arrives through the normal URL handler. Without the matching
+token a result code is useless to anyone else anyway.
+
 ---
 
 ## Endpoints
@@ -146,8 +287,14 @@ authorization-code flow with PKCE (RFC 7636, S256 only).
 | `POST /auth/mobile/confirm` | Browser session + nonce | Redirect to `sylo://auth?code=…&state=…` |
 | `POST /api/mobile/token` | Code + verifier | `{ token, expiresAt, account }`, or `400 invalid_grant` |
 | `DELETE /api/mobile/token` | Bearer token | `204`, or `401` without a valid token |
+| `POST /api/mobile/connect/:platform` | Bearer token | `{ code, expiresAt }`: a one-time code to add that platform's login ([Adding the other login](#adding-the-other-login)); `400`, `401`, `403` or `409` |
+| `GET /auth/mobile/connect?code=…` | None (browser) | The confirmation page; the link is used up when it is opened |
+| `POST /api/mobile/connect/complete` | Bearer token | `{ ok, platform, platforms }`: links the login the sheet ended with, for the token that began the flow only; `400 invalid_result`, `401`, `403` or `409` |
+| `GET /auth/mobile/connect/continue?nonce=…` | Browser session + nonce | Redirect to the other platform's login |
 | `/api/v2/*` | Bearer token | The dashboard's JSON API |
 | `GET /api/v2/changelog?limit=N` | Bearer token or session | `{ version, releases: [{ version, date, url, sections: [{ title, kind, items: [{ scope, text, refs }] }] }] }`, newest first; the same release notes as the dashboard's What's new page |
+| `GET /api/v2/guilds/:id/members?q=` | Bearer token or session, Manage Server | `{ members: [{ id, name, username }] }`: the server's members by name (those Sylo has cached) or one pasted id (looked up live), never a bot, at most 25. 100 searches per minute per account and server |
+| `GET /api/v2/guilds/:id/health` | Bearer token, server admin | The permission and role-hierarchy health check of one server (below) |
 
 `GET /api/mobile/info` is public. The app calls it when you type a server
 address, to tell whether the address is a Sylo server and whether it can sign
@@ -161,10 +308,64 @@ in there:
 | `login` | Whether sign-in is available (false in open mode) |
 | `loginProviders` | The configured logins, for example `["discord", "fluxer"]`; empty when `login` is false |
 | `platforms` | The platforms the bot runs on, for example `["discord"]` |
-| `features` | What this version's app API supports, for example `["app-login", "live-access", "changelog"]`, so the app can hide what an older Sylo lacks; `changelog` means `GET /api/v2/changelog` is there |
+| `features` | What this version's app API supports, so the app can hide what an older Sylo lacks. Today: `app-login`, `live-access`, `changelog`, `collectibles`, `welcome-trigger`, `member-search`, `access-levels`, `health`, `app-connect`, `setup-wizard`, `config-history`, `inbox-search`, `config-import`, `duplicate`, `message-templates` and `message-move`, plus `push` and `push-pigeon` when this instance can send notifications. See the list below |
+
+The feature strings:
+
+- `app-login`: the app sign-in above.
+- `live-access`: server access is checked live through the bot on every request.
+- `changelog`: `GET /api/v2/changelog`.
+- `collectibles`: the Economy shop's collectible items, their picture upload and the inventory.
+- `welcome-trigger`: the Welcome module's `trigger` setting (a member joins, or first gets a role).
+- `member-search`: `GET /api/v2/guilds/:id/members?q=`.
+- `access-levels`: the dashboard [access levels](#access-levels) (View, Inbox, Edit).
+- `health`: `GET /api/v2/guilds/:id/health`, the [health check](#health-check).
+- `setup-wizard`: `GET /api/v2/guilds/:id/setup/suggest` and `POST /api/v2/guilds/:id/setup/apply`.
+- `config-history`: the before and after values of audit entries, and the undo:
+  - `GET /api/v2/guilds/:id/audit/:entryId/change`: the audit list only flags an entry with `hasChange` (and `revertsId`, the entry an undo undid). This call gives the values: `before` and `after` (secrets masked), `names` (channel, role and member names for the ids in them), `kind` (`"module"`, `"settings"` or `null`) and `undo`. `undo` has `available`, `reason` when it is not, `state` (`clean`: nothing changed since; `changed`: changed again since; `reverted`: already back to the earlier values), `laterChanges` (the keys changed again), `token`, `notRestored` and `droppedSecrets`. A change too large to keep answers `tooLarge: true` and an `undo` with `available: false`. An entry without a saved change is a `404`.
+  - `POST /api/v2/guilds/:id/audit/:entryId/undo`: restores the earlier values and answers `{ ok, adjusted, notRestored }`. When the settings were changed again since the entry it answers `409` with `code: "changed-since"`, `laterChanges` and a `token` instead, and restores nothing. The app shows what would be lost, and if the person confirms it sends the same request again with `confirm: true` and that `token`. The token names the saved values the person saw, so if they changed again meanwhile the answer is a new `409`. When `state` is `changed`, `GET …/change` already gives that `token` (otherwise it is `null`), so the app can ask first.
+- `inbox-search`: `GET /api/v2/guilds/:id/search/inbox`.
+- `config-import`: `POST /api/v2/guilds/:id/import/preview` and `POST /api/v2/guilds/:id/import/apply`.
+- `duplicate`: the `duplicate` routes for reminders, embed messages, reaction-role sets, custom commands and shop items.
+- `message-templates`: the built-in message templates and the raw message JSON import and export.
+- `message-move`: when the channel of a posted **embed message**, the **Welcome channel** message or a **role panel** changes and is published, the server posts a fresh message in the new channel, stores it and then deletes the old one, so the app must not unpublish first. Other bot posts (verification, honeypot traps, applications and so on) are not covered. A publish that loses a race with another publish of the same embed message answers `409` with the current record.
+- `app-connect`: [adding the other login](#adding-the-other-login). Only where sign-in is on and both Discord and Fluxer logins are set up.
+- `push`, `push-pigeon`: this instance can send notifications to signed-in apps.
 
 An older Sylo without this endpoint answers `404`, and the app says the server
-is too old for it.
+is too old for it. A Sylo that has the endpoint but lacks a string does not have
+that feature: the app hides the control.
+
+### Health check
+
+`GET /api/v2/guilds/:id/health` tells a server admin what Sylo cannot do in the places its modules are
+set up to use: a channel it cannot post in, a role it cannot give because Sylo's role is not above it,
+a permission an action needs. Only the modules that are switched on are checked. The answer is cached for
+a minute per server and is dropped when a setting is saved; `?refresh=1` checks again at once (6 per minute).
+
+```json
+{
+  "guildId": "…", "available": true, "platform": "discord", "checkedAt": 1760000000000,
+  "summary": { "errors": 1, "warnings": 0 },
+  "checks": [{
+    "module": "verification", "moduleName": "Verification", "severity": "error",
+    "code": "role-above", "kind": "role-hierarchy",
+    "message": "Sylo can't give Verified: Sylo's role is not above it.",
+    "fix": "In the server's role settings, move Sylo's role above Verified.",
+    "href": "/v2/guilds/…/m/verification", "targetKind": "role", "targetId": "…", "targetName": "Verified"
+  }],
+  "targets": {
+    "roles": { "blockedAll": null, "blocked": { "<roleId>": "above | managed" } },
+    "channels": { "blocked": { "<channelId>": ["View Channel", "Send Messages"] }, "noEmbed": ["<channelId>"] }
+  }
+}
+```
+
+`severity` is `error` when a module cannot do that part of its job and `warning` when it still works.
+`targets` lists only the roles Sylo cannot give and the channels it cannot send in (`blocked`), and the
+channels where it can send but lacks Embed Links (`noEmbed`, which matters only to a module that sends an
+embed there), for a picker to warn about a choice that is not saved yet. A permission the platform does not
+have (Fluxer has no thread permissions) is never reported. The same checks come with the overview, in `attention.health`.
 
 On a token request, "not signed in" and "not allowed" are JSON, never a
 redirect or an HTML page:
@@ -173,10 +374,12 @@ redirect or an HTML page:
 | --- | --- |
 | `401` | `{ "error": "Not signed in, or the token is no longer valid." }` |
 | `403` | `{ "error": "You do not manage this server." }` |
+| `403` | `{ "error": "Your dashboard access in this server is View only, so you can't do this.", "access": "view", "required": "edit" }` |
 | `403` | `{ "error": "Restricted to Sylo's operators." }` |
 
 The usual per-IP rate limits apply. On top of them, per minute: 60 calls to
-`/api/mobile/info`, 30 to the `/auth/mobile` pages and 20 code exchanges.
+`/api/mobile/info`, 30 to the `/auth/mobile` pages and 20 code exchanges. Adding a login
+allows 10 codes and 10 completions per token and 10 visits to its two pages per client.
 Actions that post to the platform (test messages, publishing a message or role
 menu, locking or unlocking every channel) share a limit of 10 per minute per
 server and account, answered with `429` and an `{ "error" }`.
@@ -228,16 +431,58 @@ difference is how server access is checked:
   live through the bot, like the app.
 - For app requests Sylo checks **live, through the bot, on every request**:
   the person must own the server, have Manage Server or Administrator there, or
-  hold one of its bot-master roles. Someone who loses those rights loses access
-  from the app at once. The bot has to be in the server. The live check only
-  runs for a server that was in the stored list at sign-in, or that has
-  bot-master roles set, so a token cannot make the bot look people up in every
+  hold one of its dashboard access roles (below). Someone who loses those rights
+  loses access from the app at once. The bot has to be in the server. The live
+  check only runs for a server that was in the stored list at sign-in, or that
+  has access roles set, so a token cannot make the bot look people up in every
   server it is in. This covers the ticket pages too.
 - The server list (`GET /api/v2/guilds`) is the stored list filtered by the same
-  live check. A server where you newly gained rights shows up after the next
-  sign-in.
+  live check, plus the servers where the bot sees you holding an access role.
+  Each entry carries `access`: `"edit"`, `"inbox"` or `"view"`. A server where
+  you newly gained Manage Server shows up after the next sign-in.
 - Owner-only modules and bot-wide pages stay limited to `OWNER_IDS` /
   `FLUXER_OWNER_IDS`, the same as in the browser.
+
+### Access levels
+
+Every per-server route needs one of three levels (`access-levels` in `features`):
+
+| Level | Who | May |
+| --- | --- | --- |
+| `edit` | The owner, Manage Server, Administrator, the bot-master roles | Everything, as before |
+| `inbox` | The server's Inbox roles, and ticket staff roles for tickets | Read everything, including what the inboxes contain; reply to and close tickets, decide appeals, applications and suggestions |
+| `view` | The server's View roles | Read the pages, lists and settings; change nothing |
+
+A request above the person's level gets `403` with `access` (their level) and
+`required` (the level the route needs).
+
+- What the inboxes contain needs `inbox`: `GET .../tickets/:id` (and its
+  `/messages` and `/transcript`), `GET .../applications/submissions/:id` and
+  `GET .../applications/export`. With `view`, the lists still answer, but
+  without that content, and with `contentHidden: true`: the tickets' `preview`
+  and `previewKind`, the appeals' `answers` and `decisionReason`, the
+  applications' `reason`, and the author of an anonymous suggestion are empty.
+- Settings that hold a secret show it only with `edit`: GitHub webhook secrets
+  and addresses are `null`, and RSS feed URLs show only their origin. The
+  configuration download (`GET .../export`) and the insights refresh need `edit`.
+- Deciding an application checks the person deciding: they must be able to hand
+  out every role the decision gives (as when saving the form), no such role may
+  give more dashboard access than their own, and nobody decides their own
+  application. With `inbox`, accepting an appeal (which lifts the ban) also needs
+  Ban Members.
+- `GET /api/v2/guilds/:id/access` answers
+  `{ level, editRoleIds, inboxRoleIds, viewRoleIds, canChangeEditRoles }`.
+  `POST` to the same path with any of `editRoleIds`, `inboxRoleIds` and
+  `viewRoleIds` changes them; it needs `edit`, and changing `editRoleIds` (the
+  bot-master roles) also needs Manage Server, as on the settings page.
+- Ticket notifications go to `inbox` and `edit` (and ticket staff) only.
+- Publishing a message (`POST .../messages/:id` with `action: "publish"`) pings a
+  role in the text only when the person could ping it themselves: the owner,
+  Manage Server or Mention Everyone, or a role that is mentionable. The answer
+  carries `rolesSilent`, the names of roles in the text that were shown but not
+  pinged (an empty list when none); the app can show it as a notice. Publishing a
+  message with role buttons or menus needs the right to hand out every one of
+  those roles, and answers `403` otherwise.
 
 ---
 
@@ -341,14 +586,33 @@ without use.
 ## Health and the dev log (operators)
 
 The people who run an instance, its operators (`OWNER_IDS` and
-`FLUXER_OWNER_IDS`), get two more things in the app. Someone who only has Manage
-Server never does: the app hides them, and the server answers `403` to anyone
-else.
+`FLUXER_OWNER_IDS`), get more in the app, in an Operator section of Settings.
+Someone who only has Manage Server never does: the app hides it (it reads
+`operator` from `GET /api/v2/account` again whenever the sign-in changes), and
+the server answers `403` to anyone else. An app token works on these routes when
+its account is an operator.
 
-- **Health**, under Settings: whether the bot is up, its version, uptime,
-  gateway ping, servers and members, the database and the latest backups, and
-  the dev log. It is read only; backups are made, restored and downloaded from
-  the web dashboard.
+- **Health**: whether the bot is up, its version, uptime, gateway ping, servers
+  and members, the database, and the dev log, with a test message and a test
+  error for the dev-log channel.
+- **Backups**, from Health: create a backup, download one (it opens in Quick Look
+  and the share sheet, and the temporary file is deleted), delete one, restore
+  one, or import a file. Delete, restore and import ask for a typed word. A
+  restore replaces the live database with the backup and restarts the bot, so
+  every server's data goes back to that snapshot, and the app is signed out when
+  the backup is older than its sign-in. The app does not trust the first answer from
+  `GET /api/v2/health` after a restore, because the old process keeps answering until
+  the restore is done (and for good if the snapshot of the current database fails): it
+  says the restore is done only after a restart is seen (a lower `uptime`, or a failed
+  poll when there is no uptime), and otherwise says it could not confirm it. An import
+  is stored as a snapshot only.
+  The import is sent as raw `application/octet-stream` (a JSON body is cut at
+  256 kB) of up to 128 MB, read from the file as it goes.
+- **Bot Personalizer**: the bot's name and pictures, its presence, and the
+  announcement everyone sees.
+- **Stats cache**: the game-stats lookups every server shares (read only).
+- **Roadmap admin**: review suggestions, post, move a post to another stage,
+  edit, delete.
 - **The dev log**: Sylo's own errors and warnings, stored in the database for
   30 days (the newest 500). It works with or without a dev-log channel
   (`DEV_LOG_CHANNEL_ID`); the channel still gets errors only.
@@ -362,6 +626,15 @@ else.
 | `GET /api/v2/health` | Operators only | The Health report |
 | `GET /api/v2/dev-log?level=error&limit=100` | Operators only | `{ entries: [{ id, level, scope, message, at }] }`, newest first |
 | `POST /api/v2/health/dev-log-test` | Operators only | Posts a test message to the dev-log channel; `{ ok }` or `{ ok: false, error }` |
+| `POST /api/v2/health/dev-log-error-test` | Operators only | Logs a real error to test the pipeline; `{ ok }` |
+| `POST /api/v2/health/backups` | Operators only | Takes a backup; `{ name }` |
+| `GET /api/v2/health/backups/:name` | Operators only | The backup file, as a download |
+| `POST /api/v2/health/backups/:name/delete`, `/restore` | Operators only | `{ ok }` (a restore then restarts the bot) |
+| `POST /api/v2/health/backups/import` | Operators only | A raw body (`application/octet-stream`, up to 128 MB); `{ name }` |
+| `GET /api/v2/personalizer`, `/personalizer/presence` | Operators only | The bot; the presence and its choices |
+| `POST /api/v2/personalizer/identity`, `/presence`, `/announcement`, `/announcement/clear` | Operators only | Bot-wide settings |
+| `GET /api/v2/stats` | Operators only | `{ rows, ttlMinutes }`, the newest 50 cached game-stats lookups |
+| `GET /api/v2/roadmap/admin` and `POST /api/v2/roadmap/admin[/:id/approve, reject, status, edit, delete]` | Operators only | The roadmap review board |
 | `GET /api/v2/account` | Bearer token or session | Includes `operator: true` for an operator |
 
 ---
@@ -377,6 +650,27 @@ else.
   a link that signs in as you in your browser and delivers the code to an app on
   their side. Allow is a POST with a per-flow nonce, and the app rejects a
   callback whose `state` it did not send.
+- **Adding a login is finished by the app, not by the browser.** The link that opens the
+  sheet is made for one account by one app token, so anyone can make one for their own
+  account and send it to someone else. If the browser's login were linked on the spot,
+  that person's Discord or Fluxer login (and the servers they manage, and operator
+  rights if they have them) would end up on the attacker's account. So the callback
+  links nothing: it keeps the verified login under a result code bound to the account and
+  token of the connect code, and `sylo://connected?result=…` opens on the device of
+  whoever is in the browser. Only the app holding that very token can complete the link;
+  the victim's own app has another token and is refused. The confirmation page names the
+  account and warns when the browser is signed in as somebody else, as defence in depth.
+- **The codes.** Connect code and result code are 256 random bits each, stored only as a
+  SHA-256 hash, deleted in the statement that reads them (so they work once, also under
+  concurrency), and swept with expired tokens; a connect code lives 60 seconds, a result
+  code 120. One live connect code per account. Both stop working when the token is signed
+  out or revoked (checked when the sheet opens, at the callback and at completion), and
+  they are deleted with the account.
+- **No session, no open redirect.** The browser is never signed in or given a session; the
+  only places it is sent are the platform's own login and `sylo://connected`, with a
+  platform, result and error word that Sylo chose, never one from the request. One login
+  per platform and account is a database rule (a unique index), so two completions at
+  the same moment cannot give an account two logins; the loser gets `409`.
 - **Tokens only work on `/api/` paths.** The HTML dashboard stays cookie-only,
   and a request that presents a token is judged by the token alone (a bad token
   never falls back to a cookie).
