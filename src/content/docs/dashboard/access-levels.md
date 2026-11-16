@@ -51,6 +51,29 @@ server is View only"); the level the action needed is in the error's details.
   roles from one server to another.
 - **Ticket notifications** go to Inbox and Edit members and to ticket staff only.
 
+## Focused view for Inbox access
+
+:::note[Coming in Sylo 5.3]
+This part applies from Sylo 5.3, which is not released yet.
+:::
+
+Staff who only work the inboxes do not need the whole dashboard. From Sylo 5.3, a
+person whose level in a server is **Inbox** gets a focused view of the web
+dashboard:
+
+- The server opens on the first inbox that is switched on, not on the Overview.
+  If no inbox module is on, it opens on the Moderation hub.
+- The sidebar lists only the moderation tools: Tickets, Appeals, Applications and
+  Suggestions (only the ones that are switched on), the Moderation hub and Member
+  data. Operators who have Inbox access keep their bot pages too.
+- A **Show everything** link at the foot of the sidebar brings back the full
+  navigation. The pages that need more than Inbox access stay locked. Sylo
+  remembers the choice in that browser.
+
+People with View or Edit access see the full dashboard as before. Nothing changes
+on the Sylo server: this is only a calmer way to look at the same dashboard, and
+the levels are still enforced there.
+
 ## What Sylo refuses to hand out
 
 Sylo 5.2 also closes the ways a person could use the dashboard to give out more

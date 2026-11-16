@@ -308,7 +308,7 @@ in there:
 | `login` | Whether sign-in is available (false in open mode) |
 | `loginProviders` | The configured logins, for example `["discord", "fluxer"]`; empty when `login` is false |
 | `platforms` | The platforms the bot runs on, for example `["discord"]` |
-| `features` | What this version's app API supports, so the app can hide what an older Sylo lacks. Today: `app-login`, `live-access`, `changelog`, `collectibles`, `welcome-trigger`, `member-search`, `access-levels`, `health`, `app-connect`, `setup-wizard`, `config-history`, `inbox-search`, `config-import`, `duplicate`, `message-templates` and `message-move`, plus `push` and `push-pigeon` when this instance can send notifications. See the list below |
+| `features` | What this version's app API supports, so the app can hide what an older Sylo lacks. Today: `app-login`, `live-access`, `changelog`, `collectibles`, `welcome-trigger`, `member-search`, `access-levels`, `health`, `app-connect`, `setup-wizard`, `config-history`, `inbox-search`, `config-import`, `duplicate`, `message-templates` and `message-move`, plus `moderator-view`, `update-notice` and `public-page-look` from Sylo 5.3, plus `push` and `push-pigeon` when this instance can send notifications. See the list below |
 
 The feature strings:
 
@@ -329,6 +329,9 @@ The feature strings:
 - `duplicate`: the `duplicate` routes for reminders, embed messages, reaction-role sets, custom commands and shop items.
 - `message-templates`: the built-in message templates and the raw message JSON import and export.
 - `message-move`: when the channel of a posted **embed message**, the **Welcome channel** message or a **role panel** changes and is published, the server posts a fresh message in the new channel, stores it and then deletes the old one, so the app must not unpublish first. Other bot posts (verification, honeypot traps, applications and so on) are not covered. A publish that loses a race with another publish of the same embed message answers `409` with the current record.
+- `moderator-view` (Sylo 5.3): the web dashboard gives a person whose level in a server is `inbox` a focused view: the server opens on the inbox, and the navigation lists only the moderation tools (Tickets, Appeals, Applications, Suggestions, Moderation hub, Member data; only the inboxes that are switched on), with a "Show everything" switch for the full, still locked, navigation. Nothing changes on the server side: the level is the `access` of each `GET /api/v2/guilds` entry (and `level` of `GET /api/v2/guilds/:id/access`). The app can follow the same rules for that level and keeps the full read-only app for `view`.
+- `update-notice` (Sylo 5.3): the operators' [update notice](#update-notice-operators): `GET /api/v2/update`, and with Wise Wren set up `POST /api/v2/update/wren/approve` and `GET /api/v2/update/wren/runs/:id`. Operators only.
+- `public-page-look` (Sylo 5.3): the server's [look on its public pages](#public-page-look): `GET` and `POST /api/v2/guilds/:id/public-page-look`, the background upload and the invite-background check.
 - `app-connect`: [adding the other login](#adding-the-other-login). Only where sign-in is on and both Discord and Fluxer logins are set up.
 - `push`, `push-pigeon`: this instance can send notifications to signed-in apps.
 
@@ -383,6 +386,40 @@ allows 10 codes and 10 completions per token and 10 visits to its two pages per 
 Actions that post to the platform (test messages, publishing a message or role
 menu, locking or unlocking every channel) share a limit of 10 per minute per
 server and account, answered with `429` and an `{ "error" }`.
+
+### Public page look
+
+:::note[Coming in Sylo 5.3]
+The public page look is part of Sylo 5.3, which is not released yet.
+:::
+
+`public-page-look` in `features`. A server may give the pages its members open without the dashboard (the
+application form, the ban appeal, the quote and leaderboard pages and the web shop) its own accent colour and a
+background. That is all it can change: the layout, the type, the components, the light and dark themes and the
+"Powered by Sylo" link at the bottom of every public page stay Sylo's, and the dashboard and the app are never
+restyled. The form always sits on a semi-opaque card over a dim overlay (opaque when the visitor asks for reduced
+transparency). Every route here needs the **edit** level, the read too (a lower level gets the usual `403`).
+
+| Call | What it does |
+| --- | --- |
+| `GET /api/v2/guilds/:id/public-page-look` | The choice and what it comes to (below) |
+| `POST /api/v2/guilds/:id/public-page-look` | Saves `{ "accent": "#5865f2" or "", "background": "none", "upload" or "discord-splash" }` and answers like the `GET` |
+| `POST /api/v2/guilds/:id/public-page-look/image` | Uploads the background: a multipart body with the field `file` (PNG, JPEG or WebP, at most 2 MB, at most 16 megapixels). Sylo stores a new WebP of at most 1920 pixels, so metadata is gone. Answers like the `GET`. It does not change the choice: save `"background": "upload"` after it |
+| `POST /api/v2/guilds/:id/public-page-look/image/delete` | Deletes the uploaded picture (a choice of `upload` falls back to `none`) and answers like the `GET` |
+| `POST /api/v2/guilds/:id/public-page-look/splash/refresh` | Checks the invite background against the platform now and answers like the `GET`. Without it Sylo checks once a day, when a page that uses it is opened |
+
+The answer has `accent` and `background` (what was saved), `platform`, `upload` (`null` or `{ bytes, url, updatedAt }`),
+`splash` (`available`: the server has an invite background on the platform, Discord and Fluxer both have one;
+`copied`: `null` or `{ url, checkedAt, updatedAt }`, Sylo's own copy), `limits` and `sylo` (Sylo's accent per theme)
+`backgrounds` (the three values the app may send) and `effective`: `accent` (the colour really used for fills and
+borders, per theme: `dark` and `light`), `accentText` (the colour used for text, per theme: the accent, or the same hue
+lightened or darkened to reach 4.5:1), `contrast` (the ratio of the accent to the card per theme and whether it reaches
+the 3:1 Sylo asks for), `fallback` (the themes where it does not and Sylo's own colour is used instead), `note` (the
+sentence to show when `fallback` is not empty, else `null`), `backgroundUrl` (the picture of the chosen background,
+or `null`) and `css` (the path of the style sheet public pages load, or `null` when the server chose nothing).
+A `400` for a colour that is not `#rgb` or `#rrggbb`, for `upload` with no picture or for `discord-splash`
+when the server has none; `502` when the invite background could not be downloaded. The urls are paths on the
+Sylo server itself (the app prefixes the server address); the pictures are never loaded from the platform's CDN.
 
 ---
 
@@ -629,13 +666,88 @@ its account is an operator.
 | `POST /api/v2/health/dev-log-error-test` | Operators only | Logs a real error to test the pipeline; `{ ok }` |
 | `POST /api/v2/health/backups` | Operators only | Takes a backup; `{ name }` |
 | `GET /api/v2/health/backups/:name` | Operators only | The backup file, as a download |
-| `POST /api/v2/health/backups/:name/delete`, `/restore` | Operators only | `{ ok }` (a restore then restarts the bot) |
+| `POST /api/v2/health/backups/:name/delete`, `/restore` | Operators only | `{ ok }` (a restore then restarts the bot). `/restore` takes an optional `{ confirm: <name> }`, which must match when sent (Sylo 5.3). From Sylo 5.3, an uploaded (`sylo-imported-*`) dump on Postgres needs `{ confirm: <name>, acknowledgeSql: true }` (its SQL runs with the rights of the database role), else 400 |
 | `POST /api/v2/health/backups/import` | Operators only | A raw body (`application/octet-stream`, up to 128 MB); `{ name }` |
 | `GET /api/v2/personalizer`, `/personalizer/presence` | Operators only | The bot; the presence and its choices |
 | `POST /api/v2/personalizer/identity`, `/presence`, `/announcement`, `/announcement/clear` | Operators only | Bot-wide settings |
 | `GET /api/v2/stats` | Operators only | `{ rows, ttlMinutes }`, the newest 50 cached game-stats lookups |
 | `GET /api/v2/roadmap/admin` and `POST /api/v2/roadmap/admin[/:id/approve, reject, status, edit, delete]` | Operators only | The roadmap review board |
 | `GET /api/v2/account` | Bearer token or session | Includes `operator: true` for an operator |
+
+## Update notice (operators)
+
+:::note[Coming in Sylo 5.3]
+The update notice is part of Sylo 5.3, which is not released yet.
+:::
+
+Operators also get the update notice (feature `update-notice`): whether a newer Sylo release is out, what
+is in it, and, when the instance runs [Wise Wren](https://github.com/Ferdinand99/Wise-Wren), an **Update
+now** button. It is the same data as the dashboard's Health page. Everything is operator-only: a server
+admin who is not an operator gets `403`, a request without a sign-in `401`. The routes are listed in the
+table below. Writes are rate limited (5 approvals a minute, 6 re-checks a minute) and answer
+`429 { error }` above that.
+
+`GET /api/v2/update` answers (add `?refresh=1` to check GitHub again now):
+
+```json
+{
+  "enabled": true,
+  "current": "5.2.0",
+  "latest": "5.3.0",
+  "available": true,
+  "checkedAt": "2026-11-20T10:00:00.000Z",
+  "checkFailed": false,
+  "releaseUrl": "https://github.com/Ferdinand99/Sylo/releases/tag/v5.3.0",
+  "publishedAt": "2026-11-20T09:00:00Z",
+  "notes": { "version": "5.3.0", "date": "2026-11-20", "url": null, "sections": [
+    { "title": "New", "kind": "features", "items": [{ "scope": "dashboard", "text": "Inline markdown, https links only", "refs": [{ "label": "#370", "url": "https://github.com/..." }] }] }
+  ] },
+  "notesText": null,
+  "command": "docker compose pull && docker compose up -d",
+  "wren": null
+}
+```
+
+- `enabled` is false when the instance runs with `UPDATE_CHECK=off`: there is nothing else to show then.
+  `available` is true when `latest` is newer than `current`. `checkFailed` is true when the last look at
+  GitHub failed (`latest` then still holds an earlier answer, if there was one).
+- `notes` and `notesText` are only set while `available` is true. `notes` has the same sections as
+  `GET /api/v2/changelog` (`items[].text` is inline markdown with `https` links only, to render as text,
+  never as HTML). Release notes that are not in that format come as `notesText`, plain text.
+- `wren` is `null` when Wise Wren is not set up. Otherwise it has `configured`, `error` (`null`, or
+  `{ code, message }` when Wise Wren could not be asked or does not accept Sylo's token), `openMode` (the
+  dashboard has no login, so Update now is off unless the operator allowed it), `target`
+  (`{ name, server, status, installedVersion, latestVersion, mode, lastCheckedAt }` or `null`),
+  `updateSeen` (Wise Wren sees an update), `canApprove`, `whyNot` (the reason when it cannot, in words), and
+  `latestRun` (the run Sylo last approved, as below, or `null`; Sylo remembers it across its own restart).
+  While `latestRun` is not `finished`, `canApprove` is false and the page or app should follow that run.
+  It never has Wise Wren's address, the token or the version key.
+
+`POST /api/v2/update/wren/approve` (no body) asks Wise Wren to update Sylo now and answers
+`{ runId, status, from }`, where `from` is the version it started from. It approves exactly the version Wise
+Wren shows. Errors are `{ error, code }`: `404` (`wren_off`) when Wise Wren is not set up; `409` when there is
+nothing to approve (`not_approvable`), when Wise Wren refuses (`wren_refused`, with Wise Wren's own message:
+the version changed, a run is already going, the agent would refuse it), or in open mode (`open_mode`);
+`429`; and `502` (`wren_unreachable`, `wren_unauthorized`, `wren_forbidden`, `wren_server`, `wren_invalid`)
+when Wise Wren cannot be reached or does not accept Sylo's token. These are never `401` or `403`, which stay
+for the operator's own sign-in.
+
+`GET /api/v2/update/wren/runs/:id` answers `{ run }`, where `run` is
+`{ id, status, finished, ok, detail, version, createdAt, startedAt, finishedAt, steps: [{ step, status, durationMs }] }`
+(`status`: `queued`, `running`, `succeeded`, `rolled_back`, `failed`, `rollback_failed`, `refused`,
+`cancelled`, `lapsed`; `finished` is true for all but the first two). A run that is not the Sylo target's
+is refused (`404`, or `502` `wren_forbidden` from a token limited to one target). Poll it every few seconds, up to
+60 requests a minute.
+
+**Sylo restarts during an update**, so these requests fail for a while (a dropped connection, or `502`/`503`
+from a reverse proxy, without a `code`). The app keeps polling; it is done when the run is `finished`, or
+when `GET /api/v2/update` (or `GET /api/mobile/info`) reports a `current` / `version` other than `from`.
+
+| Method and path | Auth | Answer |
+| --- | --- | --- |
+| `GET /api/v2/update[?refresh=1]` | Operators only | The update notice above |
+| `POST /api/v2/update/wren/approve` | Operators only | `{ runId, status, from }` |
+| `GET /api/v2/update/wren/runs/:id` | Operators only | `{ run }` |
 
 ---
 

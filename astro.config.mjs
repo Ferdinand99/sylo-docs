@@ -79,6 +79,8 @@ const moduleGroups = [
 ];
 
 const beta = { text: 'Beta', variant: 'caution' };
+// Documented ahead of its release: the page says so at the top of the section.
+const soon = { text: '5.3', variant: 'note' };
 
 const modulesSidebar = [
   { label: 'Overview', slug: 'modules' },
@@ -173,9 +175,19 @@ export default defineConfig({
             { label: 'On Discord', slug: 'self-hosting/discord' },
             // Sections of the Discord guide (imported from Sylo's docs/self-hosting.md).
             { label: 'Upgrading to 5.2', link: '/self-hosting/discord/#upgrading-to-52' },
+            {
+              label: 'Update notice and Update now',
+              link: '/self-hosting/discord/#update-notice-and-update-now',
+              badge: soon,
+            },
             { label: 'Upgrading to 5.0', link: '/self-hosting/discord/#upgrading-to-50' },
             { label: 'On Fluxer', slug: 'self-hosting/fluxer' },
             { label: 'Postgres', slug: 'self-hosting/postgres' },
+            {
+              label: 'Least-privilege database role',
+              link: '/self-hosting/postgres/#least-privilege-database-role',
+              badge: soon,
+            },
           ],
         },
         {
