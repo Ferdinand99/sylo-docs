@@ -34,6 +34,10 @@ template insert buttons, one date format), the question notes in
 the retry notes on the Twitch, Kick and YouTube alert pages. Check
 `git diff` after every `npm run import`.
 
+Text for a Sylo version that is not released yet sits in a "Coming in Sylo X.Y"
+note (`:::note[Coming in Sylo 5.3]`) and its sidebar link carries a `5.3` badge.
+Remove the notes and the badges when that version is released.
+
 - `honeypot` has no page because `docs/modules/honeypot.md` doesn't exist in
   the Sylo repo yet. Once it does, the module import picks it up; add it to
   the sidebar in `astro.config.mjs` (`moduleGroups`).

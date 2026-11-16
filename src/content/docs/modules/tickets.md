@@ -38,5 +38,17 @@ server. Staff reply as **Staff** from the ticket page; the member sees Sylo's DM
 **Close ticket** sends a final reply (or the default closing notice if the box is
 empty) and closes it. The member can open a new one by DMing again.
 
+:::note[Coming in Sylo 5.3]
+The way Sylo finds the member's servers, described next, is part of Sylo 5.3, which is not released yet.
+:::
+
+When a member messages Sylo, Sylo first looks for a server where they already have an open
+ticket: a follow-up message always goes to that ticket. Otherwise it looks for the servers the
+member shares with the bot, and asks Discord about them in small steps, so that one member cannot
+make the bot send a flood of requests. If Sylo could not check every server in one go, it does not
+open a new ticket from that message. It asks the member to send the message again a few seconds
+later, and the next try continues with the servers not checked yet. This also works without the
+Server Members intent.
+
 `/forget` removes the member's ticket history: every message in their tickets,
 staff replies included. Replies already delivered by DM are not clawed back.

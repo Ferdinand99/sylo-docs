@@ -101,3 +101,30 @@ new channel, so you do not have to clean up by hand.
 Reminders and channel cleanup schedules run in the time zone of the Sylo server,
 not in your browser's. The dashboard now says which one next to the time, for
 example "at 18:00 (server time: Europe/Oslo)", so you do not have to guess.
+
+## Update notice for operators
+
+:::note[Coming in Sylo 5.3]
+This part applies from Sylo 5.3, which is not released yet.
+:::
+
+The people who run the instance see a small **Update available** note in the top
+bar when a newer Sylo release is out. It opens the **Updates** section of the
+Health page, with the new version, its release notes and the command to update.
+If you run Wise Wren, the same place has an **Update now** button. Server admins
+who are not operators do not see any of this. See
+[Update notice and Update now](/self-hosting/discord/#update-notice-and-update-now)
+for the settings.
+
+## Your own look on public pages
+
+:::note[Coming in Sylo 5.3]
+This part applies from Sylo 5.3, which is not released yet.
+:::
+
+Under **Server settings → Public pages** (Edit access) a server can give the pages
+its members open without the dashboard its own accent colour and a background:
+the application form and web shop, the ban appeal, the quote page and the
+leaderboards. The layout, the type, the light and dark themes and the small
+"Powered by Sylo" link stay Sylo's. See [Public pages](/dashboard/v2/#public-pages)
+for the details.

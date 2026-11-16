@@ -91,10 +91,15 @@ At least one platform must be configured.
 | `GAMETOOLS_API_BASE`      | `https://api.gametools.network` | Stats API base URL |
 | `STATS_CACHE_TTL_MINUTES` | `5`                             | How long stats lookups are cached |
 | `DATABASE_PATH`           | `./data/sylo.db`                | SQLite file path |
-| `DATABASE_URL`            | —                               | Optional: a `postgres://` URL to use Postgres instead of SQLite. Hosted-scale deployments only — see [Postgres (optional)](/self-hosting/postgres/). Unset (default) means nothing about the setup below changes. |
+| `DATABASE_URL`            | —                               | Optional: a `postgres://` URL to use Postgres instead of SQLite. Hosted-scale deployments only — see [Postgres (optional)](/self-hosting/postgres/), and use a [role with few rights (from Sylo 5.3, Sylo warns when it has more)](/self-hosting/postgres/#least-privilege-database-role), not a superuser. Unset (default) means nothing about the setup below changes. |
 | `BACKUP_INTERVAL_HOURS`   | `24`                            | Scheduled DB snapshot interval; `0` disables it (pre-migration + manual still run) |
 | `BACKUP_RETENTION`        | `14`                            | How many DB snapshots to keep in `<data>/backups` |
 | `BACKUP_DIR`              | `<db dir>/backups`              | Where DB snapshots are written |
+| `UPDATE_CHECK`            | `on`                            | *Sylo 5.3.* The [update notice](#update-notice-and-update-now) for operators: Sylo looks up its newest GitHub release (at most every 6 hours). `off` turns it off and nothing is requested |
+| `WISE_WREN_URL`           | —                               | *Sylo 5.3.* Optional: address of your [Wise Wren](https://github.com/Ferdinand99/Wise-Wren), to update Sylo from the dashboard. Needs the next two as well. `https`, or `http` on your own network |
+| `WISE_WREN_TOKEN`         | —                               | *Sylo 5.3, and Wise Wren 0.4 (not released yet).* A Wise Wren **target token** for Sylo's target (Wise Wren: Settings → Target tokens): it can read and approve only that target. A secret: never shown in the dashboard, never logged |
+| `WISE_WREN_TARGET_ID`     | —                               | *Sylo 5.3.* The id of Sylo's target in Wise Wren (the number in the target page's address) |
+| `WISE_WREN_ALLOW_OPEN_MODE` | `false`                       | *Sylo 5.3.* Only matters when the dashboard has no login (open mode): then **Update now** is refused, because anyone who can reach the dashboard could use it. `true` allows it anyway |
 | `LOG_LEVEL`               | `info`                          | `debug` / `info` / `warn` / `error` |
 | `LOG_FORMAT`              | `text`                          | `text` or `json` (`LOG_JSON=1` = json) |
 | `NODE_ENV`                | `development`                   | Set to `production` in deployment |
@@ -173,6 +178,16 @@ roles and save the rest of that page. With `INTENT_GUILD_MEMBERS=false` Sylo
 fetches a member from Discord before their role decides access (on every change,
 and at most once a minute for reading), because the bot is not told when roles
 change.
+
+:::note[Coming in Sylo 5.3]
+A person with Inbox access gets a focused dashboard: the server opens on the first
+inbox that is switched on, and the sidebar lists only the moderation tools (the
+inboxes that are switched on, which are Tickets, Appeals, Applications and
+Suggestions, plus the Moderation hub and Member data). A "Show everything" link at
+the foot of the sidebar brings back the full, still locked, navigation, and is
+remembered in that browser. People with View or Edit access see the full dashboard.
+See [Dashboard access levels](/dashboard/access-levels/#focused-view-for-inbox-access).
+:::
 
 `/health` (JSON) and `/metrics` stay unauthenticated so a monitor or Prometheus
 can reach them — keep them on your LAN, or restrict them at the reverse proxy if
@@ -415,6 +430,52 @@ checkout` the previous tag, then restore the matching `sylo-premigrate-*` (or a
 dated) snapshot from `data/backups/` over `data/sylo.db`. A newer database can't
 be opened by an older build — the schema check refuses it — so always roll the
 database back together with the code.
+
+### Update notice and "Update now"
+
+:::note[Coming in Sylo 5.3]
+The update notice and **Update now** are part of Sylo 5.3, which is not released yet. The settings `UPDATE_CHECK` and `WISE_WREN_*` do not exist before that. **Update now** also needs Wise Wren 0.4, which is not released yet; the notice and the update command work without it.
+:::
+
+The people who run the instance (the operators, `OWNER_IDS` / `FLUXER_OWNER_IDS`) see a small
+**Update available** note in the dashboard's top bar when a newer Sylo release is out. It opens the
+**Updates** section of the Health page: the new version, its release notes, and the command to copy,
+`docker compose pull && docker compose up -d`. Server admins who are not operators see none of this,
+and the Sylo app shows the same to operators (see [The Sylo app](/app/ios/#update-notice-operators)).
+
+- **How it checks.** Sylo asks `api.github.com` for its latest release, anonymously, when an operator
+  opens the dashboard, and keeps the answer for 6 hours. Nothing about your instance is sent (GitHub sees your server's address, as for any request). A failed
+  check is quiet (one log line) and never delays startup. To turn it off completely, set
+  `UPDATE_CHECK=off`; Sylo then makes no request, and the Health page says the check is off.
+- **Without any setup**, the notice and the command are all you get: you run the command yourself.
+  Sylo itself never gets access to the Docker socket (that would be root on the host).
+- **Updating without the command line (optional).** If you run
+  [Wise Wren](https://github.com/Ferdinand99/Wise-Wren), it can do the update, and the dashboard
+  gets an **Update now** button. This needs a Wise Wren version with target tokens, **Wise Wren 0.4,
+  which is not released yet**:
+
+  1. In Wise Wren, make sure Sylo shows up as a target and that the agent's `[updates]` allow list
+     includes it.
+  2. In Wise Wren, make a **target token** (Settings → Target tokens) for that target. It can read and
+     approve that one target and nothing else, so a leaked token cannot update anything else. Use the
+     token's `ww_…` value below.
+  3. Set `WISE_WREN_URL`, `WISE_WREN_TOKEN` and `WISE_WREN_TARGET_ID` (all three) and restart Sylo.
+
+  Sylo then shows what Wise Wren sees for the target. **Update now** (operators only, after a
+  confirmation) approves that exact version in Wise Wren, which stops Sylo, takes a snapshot, starts the
+  new version and rolls back if it does not come up healthy. The Health page follows the run and
+  reconnects by itself when Sylo restarts. Sylo remembers the run it approved (in its database), so
+  **Update now** stays off while that run is going, also after the restart. If Wise Wren refuses (the
+  version changed, a run is already going, the target only notifies), you see Wise Wren's own words.
+  The token stays on the server: it is never sent to the browser or the app, and never logged. Sylo only
+  calls three Wise Wren routes, all for the one target: `GET /api/v1/targets/<id>`,
+  `POST /api/v1/targets/<id>/approve` and `GET /api/v1/runs/<id>`. Without these settings only the notice
+  and the command are shown.
+- **Open mode.** When the dashboard has no login (no `DISCORD_CLIENT_SECRET` or `FLUXER_CLIENT_SECRET`),
+  everyone who can reach it counts as an operator. **Update now** is refused there (the notice, the
+  command and what Wise Wren sees are still shown, and Sylo logs a warning at start), because it spends
+  Sylo's Wise Wren token on behalf of whoever sent the request. Set up a login, or set
+  `WISE_WREN_ALLOW_OPEN_MODE=true` if you accept that on a network you trust.
 
 ### Upgrading to 5.2
 
