@@ -22,7 +22,17 @@ Sylo repo and re-import.
 | `/modules/` (overview) | `docs/modules/README.md` | `scripts/import-modules.mjs` |
 | `/modules/<id>/` | `docs/modules/<id>.md` | `scripts/import-modules.mjs` |
 
-Hand-written: only the home page, `src/content/docs/index.mdx`.
+Hand-written: the home page, `src/content/docs/index.mdx`, and the two dashboard
+pages `dashboard/overview-and-tools.md` and `dashboard/access-levels.md`.
+
+Some generated pages also carry text that is **not** in the Sylo docs yet, so a
+re-import removes it and it must be put back (or, better, moved into the Sylo
+docs first): the `PIGEON_URL` row and the *Upgrading to 5.2* section in
+`self-hosting/discord.md`, three bullets in `dashboard/v2.md` (module switch,
+template insert buttons, one date format), the question notes in
+`modules/appeals.md`, the immunity roles sentence in `modules/automod.md`, and
+the retry notes on the Twitch, Kick and YouTube alert pages. Check
+`git diff` after every `npm run import`.
 
 - `honeypot` has no page because `docs/modules/honeypot.md` doesn't exist in
   the Sylo repo yet. Once it does, the module import picks it up; add it to

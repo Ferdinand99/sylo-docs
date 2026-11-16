@@ -30,3 +30,8 @@ Announce in a channel when a Twitch streamer goes live.
 
 - Sylo polls periodically and de-duplicates so one "went live" event posts once
   per stream.
+- A poll that fails because of a network error, a server error (5xx) or a rate
+  limit (429, where Sylo waits as long as Twitch asks) is retried once. A run of
+  failures is written to the operator's log once, not every minute. An expired
+  token is refreshed and the request tried again. A setup problem that does not
+  go away is logged at most once an hour.

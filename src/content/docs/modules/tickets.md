@@ -1,5 +1,5 @@
 ---
-title: Tickets (modmail)
+title: Tickets
 description: Members DM the bot; staff reply from the dashboard.
 ---
 

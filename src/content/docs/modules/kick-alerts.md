@@ -36,3 +36,10 @@ Announce in a channel when a [Kick.com](https://kick.com) streamer goes live.
   start time, so one "went live" event posts once per broadcast — a new stream by
   the same channel fires again.
 - Dedupe state lives in the shared `posted_keys` table (scope `kick`).
+- The alert always links to the channel's Kick page (`kick.com/<channel>`), never
+  to another address that Kick's API returns.
+- A poll that fails because of a network error, a server error (5xx) or a rate
+  limit (429, where Sylo waits as long as Kick asks) is retried once. A run of
+  failures is written to the operator's log once, not every minute. An expired
+  token is refreshed and the request tried again. A setup problem that does not
+  go away is logged at most once an hour.
